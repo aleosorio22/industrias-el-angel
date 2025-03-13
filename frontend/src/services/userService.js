@@ -1,0 +1,48 @@
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:3500/api';
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  };
+};
+
+const userService = {
+  createUser: async (userData) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/users/register`,
+        userData,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
+  },
+
+  updateUser: async (id, userData) => {
+    const response = await axios.put(`${API_BASE_URL}/users/${id}`, userData, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    return response.data;
+  },
+
+  deleteUser: async (id) => {
+    const response = await axios.delete(`${API_BASE_URL}/users/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    return response.data;
+  }
+};
+
+export default userService;
