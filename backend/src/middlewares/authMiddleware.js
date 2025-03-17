@@ -1,24 +1,48 @@
 const jwt = require('jsonwebtoken');
+const userModel = require('../models/userModel'); // Añadimos esta importación
 
 const authMiddleware = async (req, res, next) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ message: 'Token no proporcionado' });
+        // Verificar formato del header
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'Formato de token inválido' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const token = authHeader.split(' ')[1];
         
-        // Verificar si el usuario sigue activo
-        const user = await userModel.findById(decoded.id);
-        if (!user || user.estado === 'inactivo') {
-            return res.status(403).json({ message: 'Usuario inactivo o no existe' });
-        }
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            
+            // Verificar si el usuario existe y está activo
+            const user = await userModel.findById(decoded.id);
+            if (!user) {
+                return res.status(403).json({ message: 'Usuario no encontrado' });
+            }
+            
+            if (user.estado === 'inactivo') {
+                return res.status(403).json({ message: 'Usuario inactivo' });
+            }
 
-        req.user = decoded;
-        next();
+            // Agregar información del usuario al request
+            req.user = {
+                id: decoded.id,
+                rol: decoded.rol
+            };
+            
+            next();
+        } catch (jwtError) {
+            return res.status(401).json({ 
+                message: 'Token inválido o expirado',
+                error: jwtError.message 
+            });
+        }
     } catch (error) {
-        return res.status(401).json({ message: 'Token inválido' });
+        console.error('Error en autenticación:', error);
+        return res.status(500).json({ 
+            message: 'Error en la autenticación',
+            error: error.message 
+        });
     }
 };
 

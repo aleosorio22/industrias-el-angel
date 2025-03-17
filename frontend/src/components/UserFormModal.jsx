@@ -1,8 +1,29 @@
 import { Dialog, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
 
-export default function UserFormModal({ isOpen, onClose, onSubmit, formData, setFormData, isEditing }) {
+export default function UserFormModal({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  formData, 
+  setFormData, 
+  isEditing,
+  selectedUser 
+}) {
+  useEffect(() => {
+    if (isEditing && selectedUser) {
+      setFormData({
+        nombre: selectedUser.nombre,
+        apellido: selectedUser.apellido,
+        email: selectedUser.email,
+        telefono: selectedUser.telefono,
+        rol: selectedUser.rol,
+        estado: selectedUser.estado
+      });
+    }
+  }, [isEditing, selectedUser, setFormData]);
+
   return (
     <Transition show={isOpen} as={Fragment}>
       <Dialog onClose={onClose} className="relative z-50">
@@ -117,11 +138,28 @@ export default function UserFormModal({ isOpen, onClose, onSubmit, formData, set
                       className="w-full px-3 py-2 rounded-lg border border-secondary/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                     >
                       <option value="usuario">Usuario</option>
+                      <option value="vendedor">Vendedor</option>
                       <option value="admin">Administrador</option>
                     </select>
                   </div>
 
-                  <div className="flex justify-end space-x-3 mt-6">
+                  {isEditing && (
+                    <div>
+                      <label className="block text-sm font-medium text-text mb-1">
+                        Estado
+                      </label>
+                      <select
+                        value={formData.estado}
+                        onChange={(e) => setFormData({...formData, estado: e.target.value})}
+                        className="w-full px-3 py-2 rounded-lg border border-secondary/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                      >
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end space-x-3 pt-4">
                     <button
                       type="button"
                       onClick={onClose}
@@ -133,7 +171,7 @@ export default function UserFormModal({ isOpen, onClose, onSubmit, formData, set
                       type="submit"
                       className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-white transition-colors"
                     >
-                      {isEditing ? 'Actualizar' : 'Crear'}
+                      {isEditing ? 'Guardar Cambios' : 'Crear Usuario'}
                     </button>
                   </div>
                 </form>
