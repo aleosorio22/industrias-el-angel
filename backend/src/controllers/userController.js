@@ -11,7 +11,6 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Credenciales inválidas' });
         }
 
-        // Verificar si el usuario está activo
         if (user.estado === 'inactivo') {
             return res.status(403).json({ message: 'Usuario inactivo' });
         }
@@ -21,12 +20,17 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Credenciales inválidas' });
         }
 
+        // Asegurarnos de que estamos firmando la información correcta
         const token = jwt.sign(
-            { id: user.id, rol: user.rol },
+            { 
+                id: user.id, 
+                rol: user.rol 
+            },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 
+        // Enviar respuesta con token y datos del usuario
         res.json({
             token,
             user: {
@@ -34,12 +38,12 @@ exports.login = async (req, res) => {
                 nombre: user.nombre,
                 apellido: user.apellido,
                 email: user.email,
-                rol: user.rol,
-                estado: user.estado
+                rol: user.rol
             }
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error en login:', error);
+        res.status(500).json({ message: 'Error en el servidor' });
     }
 };
 
