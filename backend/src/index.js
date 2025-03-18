@@ -5,6 +5,9 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 const userRoutes = require('./routes/userRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const unitRoutes = require('./routes/unitRoutes');
+const presentationRoutes = require('./routes/presentationRoutes');
 
 const app = express();
 
@@ -16,6 +19,9 @@ app.use(express.json());
 
 // Rutas
 app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/units', unitRoutes);
+app.use('/api/presentations', presentationRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {
