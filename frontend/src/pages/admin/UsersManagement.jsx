@@ -221,12 +221,21 @@ export default function UsersManagement() {
       />
 
       <ConfirmDialog
+        isOpen={showConfirmCreate}
+        onClose={() => setShowConfirmCreate(false)}
+        onConfirm={handleConfirmCreate}
+        title="Crear Usuario"
+        message="¿Estás seguro que deseas crear este usuario?"
+        type="success"
+      />
+
+      <ConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleDeleteUser}
         title="Eliminar Usuario"
         message={`¿Estás seguro que deseas eliminar al usuario ${selectedUser?.nombre} ${selectedUser?.apellido}?`}
-        type="danger"
+        type="warning"
       />
 
       {error && (
