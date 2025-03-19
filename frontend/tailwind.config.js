@@ -1,55 +1,76 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+const { fontFamily } = require("tailwindcss/defaultTheme")
+
+module.exports = {
+  darkMode: ["class"],
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "*.{js,ts,jsx,tsx,mdx}",
+    "app/**/*.{ts,tsx}",
+    "components/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {
       colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: '#4CAF50', // Verde más claro y amigable
-          light: '#66BB6A',
-          dark: '#43A047',
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: '#81C784', // Verde suave
-          light: '#A5D6A7',
-          dark: '#66BB6A',
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: '#E8F5E9', // Verde casi blanco
-          light: '#F1F8E9',
-          dark: '#C8E6C9',
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
         },
-        cream: {
-          DEFAULT: '#FFFFFF', // Blanco puro
-          light: '#FFFFFF',
-          dark: '#FAFAFA',
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
         },
-        text: {
-          DEFAULT: '#212121', // Negro suave para texto
-          light: '#424242',
-          dark: '#000000',
-        }
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Outfit', 'Inter', 'system-ui', 'sans-serif'], // Para títulos
+        sans: ["Inter", "system-ui", "sans-serif", ...fontFamily.sans],
+        display: ["Outfit", "Inter", "system-ui", "sans-serif"], // Para títulos
       },
       fontSize: {
-        'display-1': ['3.5rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
-        'display-2': ['3rem', { lineHeight: '1.2', letterSpacing: '-0.02em' }],
-        'heading-1': ['2.5rem', { lineHeight: '1.3', letterSpacing: '-0.01em' }],
-        'heading-2': ['2rem', { lineHeight: '1.35', letterSpacing: '-0.01em' }],
-        'heading-3': ['1.75rem', { lineHeight: '1.375' }],
-        'heading-4': ['1.5rem', { lineHeight: '1.375' }],
+        "display-1": ["3.5rem", { lineHeight: "1.2", letterSpacing: "-0.02em" }],
+        "display-2": ["3rem", { lineHeight: "1.2", letterSpacing: "-0.02em" }],
+        "heading-1": ["2.5rem", { lineHeight: "1.3", letterSpacing: "-0.01em" }],
+        "heading-2": ["2rem", { lineHeight: "1.35", letterSpacing: "-0.01em" }],
+        "heading-3": ["1.75rem", { lineHeight: "1.375" }],
+        "heading-4": ["1.5rem", { lineHeight: "1.375" }],
       },
       boxShadow: {
-        'soft': '0 2px 15px -3px rgba(122, 62, 25, 0.07)',
-        'medium': '0 4px 25px -5px rgba(122, 62, 25, 0.1)',
+        soft: "0 2px 15px -3px rgba(0, 0, 0, 0.07)",
+        medium: "0 4px 25px -5px rgba(0, 0, 0, 0.1)",
+        hard: "0 10px 40px -10px rgba(0, 0, 0, 0.2)",
       },
     },
   },
   plugins: [],
 }
+
