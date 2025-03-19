@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 12%;
 
-    --primary: 152 65% 45%;
+    --primary: 118 100% 35%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 217 19% 47%;
@@ -35,35 +35,7 @@
     --radius: 0.625rem;
   }
 
-  .dark {
-    --background: 0 0% 12%;
-    --foreground: 0 0% 100%;
-
-    --card: 0 0% 15%;
-    --card-foreground: 0 0% 100%;
-
-    --popover: 0 0% 15%;
-    --popover-foreground: 0 0% 100%;
-
-    --primary: 152 65% 45%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 217 19% 47%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 215 25% 18%;
-    --muted-foreground: 215 16% 75%;
-
-    --accent: 215 25% 18%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 215 25% 22%;
-    --input: 215 25% 22%;
-    --ring: 152 65% 45%;
-  }
+  
 
   html {
     font-family: "Inter", system-ui, sans-serif;
