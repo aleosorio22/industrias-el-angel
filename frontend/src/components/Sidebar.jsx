@@ -15,6 +15,9 @@ import {
   FiMenu,
   FiX,
   FiChevronLeft,
+  FiTag,
+  FiHash,
+  FiBox
 } from "react-icons/fi"
 
 // Creamos un contexto para compartir el estado del sidebar
@@ -64,11 +67,15 @@ export default function Sidebar() {
   const menuItems = [
     { name: "Dashboard", icon: FiHome, path: "/admin/dashboard" },
     { name: "Usuarios", icon: FiUsers, path: "/admin/users" },
+    { name: "Categorías", icon: FiTag, path: "/admin/categories" },
     { name: "Productos", icon: FiPackage, path: "/admin/products" },
+    { name: "Unidades", icon: FiHash, path: "/admin/units"},
+    { name: "Presentaciones", icon: FiBox, path: "/admin/presentations" },
     { name: "Pedidos", icon: FiShoppingCart, path: "/admin/orders" },
     { name: "Reportes", icon: FiPieChart, path: "/admin/reports" },
     { name: "Configuración", icon: FiSettings, path: "/admin/settings" },
     { name: "Ayuda", icon: FiHelpCircle, path: "/admin/help" },
+    
   ]
 
   const isActive = (path) => {
@@ -123,7 +130,7 @@ export default function Sidebar() {
         )}
 
         {/* Main navigation */}
-        <div className="flex-1 overflow-y-auto py-6">
+        <div className="flex-1 overflow-y-auto py-6 scrollbar-thin scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 scrollbar-track-transparent">
           <ul className="space-y-1.5 px-2">
             {menuItems.map((item) => (
               <li key={item.name}>
@@ -190,7 +197,7 @@ export default function Sidebar() {
             </div>
 
             {/* Navigation */}
-            <div className="flex-1 overflow-y-auto py-4">
+            <div className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 scrollbar-track-transparent">
               <ul className="space-y-1 px-3">
                 {menuItems.map((item) => (
                   <li key={item.name}>
