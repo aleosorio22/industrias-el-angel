@@ -11,7 +11,12 @@ import Login from "../pages/Login";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import UserDashboard from "../pages/user/UserDashboard";
 import UsersManagement from "../pages/admin/UsersManagement";
+import CategoriesManagement from "../pages/admin/CategoriesManagement";
+import UnitsManagement from "../pages/admin/UnitsManagement";
+import PresentationsManagement from "../pages/admin/PresentationsManagement";
 import NotFound from "../pages/NotFound";
+
+
 
 function AppRouter() {
   const { auth } = useAuth();
@@ -40,6 +45,9 @@ function AppRouter() {
             <Route index element={<Navigate to="/admin/dashboard" />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<UsersManagement />} />
+            <Route path="/admin/categories" element={<CategoriesManagement />} />
+            <Route path="/admin/units" element={<UnitsManagement />} />
+            <Route path="/admin/presentations" element={<PresentationsManagement />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         ) : (
