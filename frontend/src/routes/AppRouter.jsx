@@ -15,6 +15,7 @@ import CategoriesManagement from "../pages/admin/CategoriesManagement";
 import UnitsManagement from "../pages/admin/UnitsManagement";
 import PresentationsManagement from "../pages/admin/PresentationsManagement";
 import NotFound from "../pages/NotFound";
+import ProductsManagement from "../pages/admin/ProductsManagement";
 
 
 
@@ -48,6 +49,7 @@ function AppRouter() {
             <Route path="/admin/categories" element={<CategoriesManagement />} />
             <Route path="/admin/units" element={<UnitsManagement />} />
             <Route path="/admin/presentations" element={<PresentationsManagement />} />
+            <Route path="/admin/products" element={<ProductsManagement />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         ) : (
