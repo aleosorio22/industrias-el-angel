@@ -16,7 +16,7 @@ import UnitsManagement from "../pages/admin/UnitsManagement";
 import PresentationsManagement from "../pages/admin/PresentationsManagement";
 import NotFound from "../pages/NotFound";
 import ProductsManagement from "../pages/admin/ProductsManagement";
-
+import ProductDetails from "../pages/admin/ProductDetails";
 
 
 function AppRouter() {
@@ -50,6 +50,7 @@ function AppRouter() {
             <Route path="/admin/units" element={<UnitsManagement />} />
             <Route path="/admin/presentations" element={<PresentationsManagement />} />
             <Route path="/admin/products" element={<ProductsManagement />} />
+            <Route path="/admin/products/:id/details" element={<ProductDetails />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         ) : (
