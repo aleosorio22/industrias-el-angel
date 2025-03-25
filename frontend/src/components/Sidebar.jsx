@@ -75,7 +75,7 @@ export default function Sidebar() {
     { name: "Reportes", icon: FiPieChart, path: "/admin/reports" },
     { name: "Configuración", icon: FiSettings, path: "/admin/settings" },
     { name: "Ayuda", icon: FiHelpCircle, path: "/admin/help" },
-    
+    { name: "Clientes", icon: FiUsers, path: "/admin/clients" },
   ]
 
   const isActive = (path) => {

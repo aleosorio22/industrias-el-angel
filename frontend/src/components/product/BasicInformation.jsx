@@ -36,7 +36,7 @@ export default function BasicInformation({ product }) {
           </div>
           <div className="bg-gray-50 p-4 rounded-lg">
             <span className="text-sm text-gray-500">Precio Base</span>
-            <p className="font-medium mt-1">${Number(product.precio_base).toFixed(2)}</p>
+            <p className="font-medium mt-1">Q{Number(product.precio_base).toFixed(2)}</p>
           </div>
         </div>
 

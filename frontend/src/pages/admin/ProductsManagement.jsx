@@ -94,7 +94,7 @@ export default function ProductsManagement() {
       sortable: true,
       render: (row) => (
         <span className="font-medium">
-          ${Number(row.precio_base).toFixed(2)}
+          Q{Number(row.precio_base).toFixed(2)}
         </span>
       ),
     },
