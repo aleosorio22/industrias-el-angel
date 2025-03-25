@@ -3,10 +3,13 @@ import { useParams, useNavigate } from "react-router-dom"
 import { FiArrowLeft } from "react-icons/fi"
 import productService from "../../services/ProductService"
 import conversionService from "../../services/ConversionService"
+import presentationProductService from "../../services/PresentationProductService"
 import { toast } from "react-hot-toast"
 import BasicInformation from "../../components/product/BasicInformation"
 import Conversions from "../../components/product/Conversions"
 import ConversionFormModal from "../../components/product/ConversionFormModal"
+import Presentations from "../../components/product/Presentations"
+import PresentationFormModal from "../../components/product/PresentationFormModal"
 import ConfirmDialog from "../../components/ConfirmDialog"
 
 export default function ProductDetails() {
@@ -14,14 +17,27 @@ export default function ProductDetails() {
   const navigate = useNavigate()
   const [product, setProduct] = useState(null)
   const [conversions, setConversions] = useState([])
+  const [presentations, setPresentations] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  
+  // Estados para conversiones
   const [isConversionModalOpen, setIsConversionModalOpen] = useState(false)
   const [selectedConversion, setSelectedConversion] = useState(null)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [isDeleteConversionDialogOpen, setIsDeleteConversionDialogOpen] = useState(false)
   const [conversionToDelete, setConversionToDelete] = useState(null)
+  
+  // Estados para presentaciones
+  const [isPresentationModalOpen, setIsPresentationModalOpen] = useState(false)
+  const [selectedPresentation, setSelectedPresentation] = useState(null)
+  const [isDeletePresentationDialogOpen, setIsDeletePresentationDialogOpen] = useState(false)
+  const [presentationToDelete, setPresentationToDelete] = useState(null)
+  
+  // Estado compartido para formularios pendientes
   const [pendingFormData, setPendingFormData] = useState(null)
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [confirmAction, setConfirmAction] = useState(null)
 
+  // Manejadores para conversiones
   const handleAddConversion = () => {
     setSelectedConversion(null)
     setIsConversionModalOpen(true)
@@ -34,45 +50,91 @@ export default function ProductDetails() {
 
   const handleSubmitConversion = async (formData) => {
     setPendingFormData(formData)
+    setConfirmAction('conversion')
     setIsConfirmDialogOpen(true)
-  }
-
-  const handleConfirmAction = async () => {
-    try {
-      if (selectedConversion) {
-        await conversionService.updateConversion(selectedConversion.id, {
-          ...pendingFormData,
-          producto_id: id
-        })
-      } else {
-        await conversionService.createConversion({
-          ...pendingFormData,
-          producto_id: id
-        })
-      }
-      
-      const updatedConversions = await conversionService.getProductConversions(id)
-      setConversions(updatedConversions)
-      toast.success(
-        selectedConversion 
-          ? 'Conversión actualizada exitosamente'
-          : 'Conversión creada exitosamente'
-      )
-      setIsConversionModalOpen(false)
-    } catch (error) {
-      toast.error(error.message || 'Error al guardar la conversión')
-    } finally {
-      setIsConfirmDialogOpen(false)
-      setPendingFormData(null)
-    }
   }
 
   const handleDeleteConversion = (conversion) => {
     setConversionToDelete(conversion)
-    setIsDeleteDialogOpen(true)
+    setIsDeleteConversionDialogOpen(true)
   }
 
-  const handleConfirmDelete = async () => {
+  // Manejadores para presentaciones
+  const handleAddPresentation = () => {
+    setSelectedPresentation(null)
+    setIsPresentationModalOpen(true)
+  }
+
+  const handleEditPresentation = (presentation) => {
+    setSelectedPresentation(presentation)
+    setIsPresentationModalOpen(true)
+  }
+
+  const handleSubmitPresentation = async (formData) => {
+    setPendingFormData(formData)
+    setConfirmAction('presentation')
+    setIsConfirmDialogOpen(true)
+  }
+
+  const handleDeletePresentation = (presentation) => {
+    setPresentationToDelete(presentation)
+    setIsDeletePresentationDialogOpen(true)
+  }
+
+  // Manejadores de confirmación
+  const handleConfirmAction = async () => {
+    try {
+      if (confirmAction === 'conversion') {
+        if (selectedConversion) {
+          await conversionService.updateConversion(selectedConversion.id, {
+            ...pendingFormData,
+            producto_id: id
+          })
+        } else {
+          await conversionService.createConversion({
+            ...pendingFormData,
+            producto_id: id
+          })
+        }
+        const updatedConversions = await conversionService.getProductConversions(id)
+        setConversions(updatedConversions)
+        setIsConversionModalOpen(false)
+        toast.success(
+          selectedConversion 
+            ? 'Conversión actualizada exitosamente'
+            : 'Conversión creada exitosamente'
+        )
+      } else {
+        if (selectedPresentation) {
+          await presentationProductService.updatePresentation(selectedPresentation.id, {
+            ...pendingFormData,
+            producto_id: id
+          })
+        } else {
+          await presentationProductService.createPresentation({
+            ...pendingFormData,
+            producto_id: id
+          })
+        }
+        const updatedPresentations = await presentationProductService.getProductPresentations(id)
+        setPresentations(updatedPresentations)
+        setIsPresentationModalOpen(false)
+        toast.success(
+          selectedPresentation 
+            ? 'Presentación actualizada exitosamente'
+            : 'Presentación creada exitosamente'
+        )
+      }
+    } catch (error) {
+      toast.error(error.message || `Error al guardar ${confirmAction === 'conversion' ? 'la conversión' : 'la presentación'}`)
+    } finally {
+      setIsConfirmDialogOpen(false)
+      setPendingFormData(null)
+      setConfirmAction(null)
+    }
+  }
+
+  const handleConfirmDeleteConversion = async () => {
     try {
       await conversionService.deleteConversion(conversionToDelete.id)
       const updatedConversions = await conversionService.getProductConversions(id)
@@ -81,8 +143,22 @@ export default function ProductDetails() {
     } catch (error) {
       toast.error(error.message || 'Error al eliminar la conversión')
     } finally {
-      setIsDeleteDialogOpen(false)
+      setIsDeleteConversionDialogOpen(false)
       setConversionToDelete(null)
+    }
+  }
+
+  const handleConfirmDeletePresentation = async () => {
+    try {
+      await presentationProductService.deletePresentation(presentationToDelete.id)
+      const updatedPresentations = await presentationProductService.getProductPresentations(id)
+      setPresentations(updatedPresentations)
+      toast.success('Presentación eliminada exitosamente')
+    } catch (error) {
+      toast.error(error.message || 'Error al eliminar la presentación')
+    } finally {
+      setIsDeletePresentationDialogOpen(false)
+      setPresentationToDelete(null)
     }
   }
 
@@ -90,12 +166,14 @@ export default function ProductDetails() {
     const fetchProductData = async () => {
       try {
         setIsLoading(true)
-        const [productData, conversionsData] = await Promise.all([
+        const [productData, conversionsData, presentationsData] = await Promise.all([
           productService.getProductById(id),
-          conversionService.getProductConversions(id)
+          conversionService.getProductConversions(id),
+          presentationProductService.getProductPresentations(id)
         ])
         setProduct(productData)
         setConversions(conversionsData)
+        setPresentations(presentationsData)
       } catch (error) {
         console.error('Error fetching product:', error)
         toast.error("Error al cargar el producto")
@@ -133,12 +211,20 @@ export default function ProductDetails() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <BasicInformation product={product} />
-        <Conversions 
-          conversions={conversions}
-          onAddConversion={handleAddConversion}
-          onEditConversion={handleEditConversion}
-          onDeleteConversion={handleDeleteConversion}
-        />
+        <div className="space-y-8">
+          <Conversions 
+            conversions={conversions}
+            onAddConversion={handleAddConversion}
+            onEditConversion={handleEditConversion}
+            onDeleteConversion={handleDeleteConversion}
+          />
+          <Presentations 
+            presentations={presentations}
+            onAddPresentation={handleAddPresentation}
+            onEditPresentation={handleEditPresentation}
+            onDeletePresentation={handleDeletePresentation}
+          />
+        </div>
       </div>
       
       <ConversionFormModal
@@ -147,26 +233,52 @@ export default function ProductDetails() {
         onSubmit={handleSubmitConversion}
         initialData={selectedConversion}
       />
+
+      <PresentationFormModal
+        isOpen={isPresentationModalOpen}
+        onClose={() => setIsPresentationModalOpen(false)}
+        onSubmit={handleSubmitPresentation}
+        initialData={selectedPresentation}
+      />
       
       <ConfirmDialog
         isOpen={isConfirmDialogOpen}
         onClose={() => {
           setIsConfirmDialogOpen(false)
           setPendingFormData(null)
+          setConfirmAction(null)
         }}
         onConfirm={handleConfirmAction}
-        title={selectedConversion ? "Confirmar Edición" : "Confirmar Creación"}
-        message={selectedConversion 
-          ? "¿Estás seguro de que deseas guardar los cambios en esta conversión?"
-          : "¿Estás seguro de que deseas crear esta nueva conversión?"}
+        title={
+          confirmAction === 'conversion'
+            ? (selectedConversion ? "Confirmar Edición" : "Confirmar Creación")
+            : (selectedPresentation ? "Confirmar Edición" : "Confirmar Creación")
+        }
+        message={
+          confirmAction === 'conversion'
+            ? (selectedConversion 
+                ? "¿Estás seguro de que deseas guardar los cambios en esta conversión?"
+                : "¿Estás seguro de que deseas crear esta nueva conversión?")
+            : (selectedPresentation
+                ? "¿Estás seguro de que deseas guardar los cambios en esta presentación?"
+                : "¿Estás seguro de que deseas crear esta nueva presentación?")
+        }
       />
       
       <ConfirmDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={handleConfirmDelete}
+        isOpen={isDeleteConversionDialogOpen}
+        onClose={() => setIsDeleteConversionDialogOpen(false)}
+        onConfirm={handleConfirmDeleteConversion}
         title="Eliminar Conversión"
         message="¿Estás seguro de que deseas eliminar esta conversión? Esta acción no se puede deshacer."
+      />
+
+      <ConfirmDialog
+        isOpen={isDeletePresentationDialogOpen}
+        onClose={() => setIsDeletePresentationDialogOpen(false)}
+        onConfirm={handleConfirmDeletePresentation}
+        title="Eliminar Presentación"
+        message="¿Estás seguro de que deseas eliminar esta presentación? Esta acción no se puede deshacer."
       />
     </div>
   )
