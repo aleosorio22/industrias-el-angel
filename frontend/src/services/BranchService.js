@@ -12,11 +12,11 @@ const getAuthHeaders = () => {
   };
 };
 
-const productService = {
-  getAllProducts: async (includeInactive = false) => {
+const branchService = {
+  getAllBranches: async (includeInactive = false) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/products?includeInactive=${includeInactive}`,
+        `${API_BASE_URL}/branches?includeInactive=${includeInactive}`,
         getAuthHeaders()
       );
       return response.data;
@@ -25,10 +25,10 @@ const productService = {
     }
   },
 
-  getProductById: async (id) => {
+  getBranchById: async (id) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/products/${id}`,
+        `${API_BASE_URL}/branches/${id}`,
         getAuthHeaders()
       );
       return response.data;
@@ -37,11 +37,35 @@ const productService = {
     }
   },
 
-  createProduct: async (productData) => {
+  getBranchesByClientId: async (clientId, includeInactive = false) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/branches/cliente/${clientId}?includeInactive=${includeInactive}`,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
+  },
+
+  getMyBranches: async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/branches/mis-sucursales/perfil`,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
+  },
+
+  createBranch: async (branchData) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/products`,
-        productData,
+        `${API_BASE_URL}/branches`,
+        branchData,
         getAuthHeaders()
       );
       return response.data;
@@ -50,11 +74,11 @@ const productService = {
     }
   },
 
-  updateProduct: async (id, productData) => {
+  updateBranch: async (id, branchData) => {
     try {
       const response = await axios.put(
-        `${API_BASE_URL}/products/${id}`,
-        productData,
+        `${API_BASE_URL}/branches/${id}`,
+        branchData,
         getAuthHeaders()
       );
       return response.data;
@@ -63,10 +87,10 @@ const productService = {
     }
   },
 
-  deleteProduct: async (id) => {
+  deleteBranch: async (id) => {
     try {
       const response = await axios.delete(
-        `${API_BASE_URL}/products/${id}`,
+        `${API_BASE_URL}/branches/${id}`,
         getAuthHeaders()
       );
       return response.data;
@@ -75,10 +99,10 @@ const productService = {
     }
   },
 
-  restoreProduct: async (id) => {
+  restoreBranch: async (id) => {
     try {
       const response = await axios.patch(
-        `${API_BASE_URL}/products/${id}/restore`,
+        `${API_BASE_URL}/branches/${id}/restore`,
         {},
         getAuthHeaders()
       );
@@ -89,4 +113,4 @@ const productService = {
   }
 };
 
-export default productService;
+export default branchService;

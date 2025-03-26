@@ -51,6 +51,18 @@ const userService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  getAvailableUsers: async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/users/available`,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
   }
 };
 

@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FiPlus, FiEdit2, FiTrash2, FiRefreshCw, FiPackage } from "react-icons/fi"
+import { useNavigate } from "react-router-dom"  // Add this import
+import { FiPlus, FiEdit2, FiTrash2, FiRefreshCw, FiPackage, FiEye } from "react-icons/fi"
 import { DataTable, SearchAndFilter } from "../../components/ui/data-table"
 import ConfirmDialog from "../../components/ConfirmDialog"
 import ProductFormModal from "../../components/ProductFormModal"
@@ -11,6 +12,7 @@ import unitService from "../../services/UnitService"
 import { toast } from "react-hot-toast"
 
 export default function ProductsManagement() {
+  const navigate = useNavigate();  // Add this line
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [units, setUnits] = useState([])
@@ -92,7 +94,7 @@ export default function ProductsManagement() {
       sortable: true,
       render: (row) => (
         <span className="font-medium">
-          ${Number(row.precio_base).toFixed(2)}
+          Q{Number(row.precio_base).toFixed(2)}
         </span>
       ),
     },
@@ -115,6 +117,13 @@ export default function ProductsManagement() {
       header: "Acciones",
       render: (row) => (
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate(`/admin/products/${row.id}/details`)}
+            className="p-1 text-text-light hover:text-primary transition-colors"
+            title="Ver más"
+          >
+            <FiEye size={18} />
+          </button>
           <button
             onClick={() => handleEdit(row)}
             className="p-1 text-text-light hover:text-text transition-colors"

@@ -12,11 +12,11 @@ const getAuthHeaders = () => {
   };
 };
 
-const productService = {
-  getAllProducts: async (includeInactive = false) => {
+const conversionService = {
+  getProductConversions: async (productId) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/products?includeInactive=${includeInactive}`,
+        `${API_BASE_URL}/conversions/product/${productId}`,
         getAuthHeaders()
       );
       return response.data;
@@ -25,23 +25,11 @@ const productService = {
     }
   },
 
-  getProductById: async (id) => {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/products/${id}`,
-        getAuthHeaders()
-      );
-      return response.data;
-    } catch (error) {
-      throw error.response ? error.response.data : error;
-    }
-  },
-
-  createProduct: async (productData) => {
+  createConversion: async (conversionData) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/products`,
-        productData,
+        `${API_BASE_URL}/conversions`,
+        conversionData,
         getAuthHeaders()
       );
       return response.data;
@@ -50,11 +38,11 @@ const productService = {
     }
   },
 
-  updateProduct: async (id, productData) => {
+  updateConversion: async (id, conversionData) => {
     try {
       const response = await axios.put(
-        `${API_BASE_URL}/products/${id}`,
-        productData,
+        `${API_BASE_URL}/conversions/${id}`,
+        conversionData,
         getAuthHeaders()
       );
       return response.data;
@@ -63,23 +51,10 @@ const productService = {
     }
   },
 
-  deleteProduct: async (id) => {
+  deleteConversion: async (id) => {
     try {
       const response = await axios.delete(
-        `${API_BASE_URL}/products/${id}`,
-        getAuthHeaders()
-      );
-      return response.data;
-    } catch (error) {
-      throw error.response ? error.response.data : error;
-    }
-  },
-
-  restoreProduct: async (id) => {
-    try {
-      const response = await axios.patch(
-        `${API_BASE_URL}/products/${id}/restore`,
-        {},
+        `${API_BASE_URL}/conversions/${id}`,
         getAuthHeaders()
       );
       return response.data;
@@ -89,4 +64,4 @@ const productService = {
   }
 };
 
-export default productService;
+export default conversionService;

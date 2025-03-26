@@ -12,11 +12,11 @@ const getAuthHeaders = () => {
   };
 };
 
-const productService = {
-  getAllProducts: async (includeInactive = false) => {
+const clientService = {
+  getAllClients: async (includeInactive = false) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/products?includeInactive=${includeInactive}`,
+        `${API_BASE_URL}/clients?includeInactive=${includeInactive}`,
         getAuthHeaders()
       );
       return response.data;
@@ -25,10 +25,10 @@ const productService = {
     }
   },
 
-  getProductById: async (id) => {
+  getClientById: async (id) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/products/${id}`,
+        `${API_BASE_URL}/clients/${id}`,
         getAuthHeaders()
       );
       return response.data;
@@ -37,11 +37,23 @@ const productService = {
     }
   },
 
-  createProduct: async (productData) => {
+  getMyClientData: async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/clients/mis-datos/perfil`,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response ? error.response.data : error;
+    }
+  },
+
+  createClient: async (clientData) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/products`,
-        productData,
+        `${API_BASE_URL}/clients`,
+        clientData,
         getAuthHeaders()
       );
       return response.data;
@@ -50,11 +62,11 @@ const productService = {
     }
   },
 
-  updateProduct: async (id, productData) => {
+  updateClient: async (id, clientData) => {
     try {
       const response = await axios.put(
-        `${API_BASE_URL}/products/${id}`,
-        productData,
+        `${API_BASE_URL}/clients/${id}`,
+        clientData,
         getAuthHeaders()
       );
       return response.data;
@@ -63,10 +75,10 @@ const productService = {
     }
   },
 
-  deleteProduct: async (id) => {
+  deleteClient: async (id) => {
     try {
       const response = await axios.delete(
-        `${API_BASE_URL}/products/${id}`,
+        `${API_BASE_URL}/clients/${id}`,
         getAuthHeaders()
       );
       return response.data;
@@ -75,10 +87,10 @@ const productService = {
     }
   },
 
-  restoreProduct: async (id) => {
+  restoreClient: async (id) => {
     try {
       const response = await axios.patch(
-        `${API_BASE_URL}/products/${id}/restore`,
+        `${API_BASE_URL}/clients/${id}/restore`,
         {},
         getAuthHeaders()
       );
@@ -89,4 +101,4 @@ const productService = {
   }
 };
 
-export default productService;
+export default clientService;
