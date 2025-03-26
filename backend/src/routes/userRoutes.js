@@ -7,7 +7,8 @@ const {
     updateUser,
     updatePassword,
     deleteUser,
-    getProfile
+    getProfile,
+    getAvailableUsers
 } = require('../controllers/userController');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
 const { validateUser, validatePasswordUpdate } = require('../middlewares/validateMiddleware');
@@ -28,6 +29,8 @@ router.get('/profile', getProfile);
 // Rutas para administradores
 router.post('/register', isAdmin, validateUser, register);
 router.get('/', isAdmin, getAllUsers);
+// Mover esta ruta antes de las rutas con parámetros
+router.get('/available', isAdmin, getAvailableUsers);
 
 // Rutas mixtas (protegidas por propiedad o admin)
 router.get('/:id', isOwnerOrAdmin, getUserById);

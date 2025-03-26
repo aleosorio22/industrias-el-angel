@@ -10,6 +10,9 @@ const unitRoutes = require('./routes/unitRoutes');
 const presentationRoutes = require('./routes/presentationRoutes');
 const productRoutes = require('./routes/productRoutes');
 const conversionRoutes = require('./routes/conversionRoutes');
+const clientRoutes = require('./routes/clientRoutes');
+const branchRoutes = require ('./routes/branchRoutes')
+const orderRoutes = require('./routes/orderRoutes')
 
 const app = express();
 
@@ -26,6 +29,9 @@ app.use('/api/units', unitRoutes);
 app.use('/api/presentations', presentationRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/conversions', conversionRoutes);
+app.use('/api/clients', clientRoutes);
+app.use('/api/branches', branchRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {

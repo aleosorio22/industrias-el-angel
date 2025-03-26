@@ -11,6 +11,9 @@ export default function ClientFormModal({
   isEditing,
   selectedClient
 }) {
+  // Asegurarse de que users sea un array antes de usar map
+  const availableUsers = users?.data || [];
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -43,12 +46,17 @@ export default function ClientFormModal({
                 disabled={isEditing}
               >
                 <option value="">Seleccionar usuario</option>
-                {users.map((user) => (
+                {availableUsers.map((user) => (
                   <option key={user.id} value={user.id}>
                     {user.email} - {user.nombre} {user.apellido}
                   </option>
                 ))}
               </select>
+              {availableUsers.length === 0 && (
+                <p className="text-sm text-red-500 mt-1">
+                  No hay usuarios disponibles para asignar
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -75,7 +83,6 @@ export default function ClientFormModal({
                 value={formData.nit}
                 onChange={(e) => setFormData({ ...formData, nit: e.target.value })}
                 className="w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                required
               />
             </div>
 
@@ -83,13 +90,12 @@ export default function ClientFormModal({
               <label htmlFor="direccion" className="block text-sm font-medium text-text">
                 Dirección
               </label>
-              <input
-                type="text"
+              <textarea
                 id="direccion"
                 value={formData.direccion}
                 onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
                 className="w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                required
+                rows={3}
               />
             </div>
 
@@ -103,15 +109,14 @@ export default function ClientFormModal({
                 value={formData.telefono}
                 onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
                 className="w-full rounded-lg border border-gray-200 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                required
               />
             </div>
 
-            <div className="pt-4 flex justify-end space-x-3">
+            <div className="flex justify-end space-x-3 mt-6">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-text-light hover:text-text transition-colors"
+                className="px-4 py-2 border border-gray-200 rounded-lg text-text-light hover:bg-gray-50 transition-colors"
               >
                 Cancelar
               </button>
@@ -119,7 +124,7 @@ export default function ClientFormModal({
                 type="submit"
                 className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
               >
-                {isEditing ? "Guardar Cambios" : "Crear Cliente"}
+                {isEditing ? "Actualizar" : "Crear"}
               </button>
             </div>
           </form>

@@ -1,6 +1,7 @@
 const userModel = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const db = require('../config/database'); // Agregar esta línea
 
 exports.login = async (req, res) => {
     try {
@@ -125,5 +126,33 @@ exports.getProfile = async (req, res) => {
         res.json(user);
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+};
+
+// Agregar este nuevo método
+exports.getAvailableUsers = async (req, res) => {
+    try {
+        // Obtener usuarios que no tienen cliente asociado y no son administradores
+        const [rows] = await db.execute(`
+            SELECT u.id, u.nombre, u.apellido, u.email, u.telefono, u.rol, u.estado 
+            FROM usuarios u 
+            LEFT JOIN clientes c ON u.id = c.usuario_id AND c.estado = 'activo'
+            WHERE u.estado = 'activo' 
+            AND u.rol = 'usuario' 
+            AND c.id IS NULL
+        `);
+        
+        // Asegurarse de que la respuesta tenga el formato correcto para el frontend
+        res.json({
+            success: true,
+            data: rows || [] // Asegurarse de que siempre sea un array
+        });
+    } catch (error) {
+        console.error('Error al obtener usuarios disponibles:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Error al obtener usuarios disponibles',
+            data: [] // Incluir un array vacío incluso en caso de error
+        });
     }
 };
