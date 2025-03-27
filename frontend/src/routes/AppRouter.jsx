@@ -24,7 +24,8 @@ import UserDashboard from "../pages/user/UserDashboard";
 import UserBranches from "../pages/user/UserBranches";
 import UserOrders from "../pages/user/UserOrders";
 import UserProfile from "../pages/user/UserProfile";
-
+import OrderDetail from "../pages/user/OrderDetail";
+import NewOrder from "../pages/user/NewOrder";
 
 function AppRouter() {
   const { auth } = useAuth();
@@ -68,6 +69,8 @@ function AppRouter() {
             <Route path="/user/dashboard" element={<UserDashboard />} />
             <Route path="/user/branches" element={<UserBranches />} />
             <Route path="/user/orders" element={<UserOrders />} />
+            <Route path="/user/orders/new" element={<NewOrder />} />
+            <Route path="/user/orders/:id" element={<OrderDetail />} />
             <Route path="/user/profile" element={<UserProfile />} />
             <Route path="*" element={<NotFound />} />
           </Route>

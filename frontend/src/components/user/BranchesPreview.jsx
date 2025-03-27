@@ -1,52 +1,79 @@
-import { Link } from "react-router-dom"
-import { FiMapPin, FiPhone, FiChevronRight } from "react-icons/fi"
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import BranchService from '../../services/BranchService';
+import { FiMapPin, FiPhone, FiChevronRight } from 'react-icons/fi';
 
-export default function BranchesPreview({ branches = [] }) {
+const BranchesPreview = () => {
+  const [branches, setBranches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        setLoading(true);
+        const response = await BranchService.getMyBranches();
+        
+        // Asegurarse de que response.data sea un array
+        if (response.success && Array.isArray(response.data)) {
+          setBranches(response.data);
+        } else {
+          // Si no es un array, establecer un array vacío
+          setBranches([]);
+          setError('No se pudieron cargar las sucursales');
+        }
+      } catch (err) {
+        console.error('Error al cargar sucursales:', err);
+        setError('Error al cargar sucursales');
+        setBranches([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBranches();
+  }, []);
+
+  if (loading) {
+    return <div className="p-4 text-center">Cargando sucursales...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-center text-red-500">{error}</div>;
+  }
+
+  if (branches.length === 0) {
+    return <div className="p-4 text-center">No tienes sucursales registradas</div>;
+  }
+
+  // Ahora podemos usar slice con seguridad porque branches es un array
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Mis sucursales</h2>
-        <Link to="/user/branches" className="text-primary text-sm flex items-center">
-          Ver todas <FiChevronRight size={16} className="ml-1" />
+    <div className="bg-white rounded-lg shadow">
+      <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+        <h2 className="font-semibold">Mis Sucursales</h2>
+        <Link to="/user/branches" className="text-sm text-green-600 hover:text-green-700">
+          Ver todas
         </Link>
       </div>
-      
-      {branches.length === 0 ? (
-        <div className="bg-gray-50 rounded-lg p-4 text-center">
-          <FiMapPin className="mx-auto h-8 w-8 text-text-light/30" />
-          <p className="mt-2 text-text-light">No tienes sucursales registradas</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {branches.slice(0, 2).map(branch => (
-            <div key={branch.id} className="border border-gray-100 rounded-lg p-3">
-              <h3 className="font-medium">{branch.nombre}</h3>
-              {branch.direccion && (
-                <div className="text-sm text-text-light mt-1">
-                  <div className="flex items-start">
-                    <FiMapPin className="mt-1 mr-2 flex-shrink-0" size={14} />
-                    <span>{branch.direccion}</span>
-                  </div>
-                </div>
-              )}
-              {branch.telefono && (
-                <div className="text-sm text-text-light mt-1">
-                  <div className="flex items-center">
-                    <FiPhone className="mr-2 flex-shrink-0" size={14} />
-                    <span>{branch.telefono}</span>
-                  </div>
-                </div>
-              )}
+      <div className="divide-y divide-gray-100">
+        {branches.slice(0, 3).map((branch) => (
+          <div key={branch.id} className="p-4">
+            <div className="font-medium">{branch.nombre}</div>
+            <div className="text-sm text-gray-500 flex items-center mt-1">
+              <FiMapPin className="mr-1" size={14} />
+              {branch.direccion}
             </div>
-          ))}
-          
-          {branches.length > 2 && (
-            <p className="text-center text-sm text-text-light">
-              +{branches.length - 2} sucursales más
-            </p>
-          )}
-        </div>
-      )}
+            {branch.telefono && (
+              <div className="text-sm text-gray-500 flex items-center mt-1">
+                <FiPhone className="mr-1" size={14} />
+                {branch.telefono}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
-  )
-}
+  );
+};
+
+export default BranchesPreview;
