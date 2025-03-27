@@ -162,124 +162,154 @@ export default function ProductDetails() {
     }
   }
 
+  // En la función useEffect donde cargas los datos iniciales
   useEffect(() => {
     const fetchProductData = async () => {
       try {
-        setIsLoading(true)
-        const [productData, conversionsData, presentationsData] = await Promise.all([
-          productService.getProductById(id),
-          conversionService.getProductConversions(id),
-          presentationProductService.getProductPresentations(id)
-        ])
-        setProduct(productData)
-        setConversions(conversionsData)
-        setPresentations(presentationsData)
+        setIsLoading(true);
+        
+        // Obtener datos del producto
+        const productData = await productService.getProductById(id);
+        setProduct(productData);
+        
+        // Obtener conversiones
+        const conversionsData = await conversionService.getProductConversions(id);
+        setConversions(Array.isArray(conversionsData) ? conversionsData : []);
+        
+        // Obtener presentaciones con manejo de errores mejorado
+        try {
+          console.log("Solicitando presentaciones para producto ID:", id);
+          const presentationsData = await presentationProductService.getProductPresentations(id);
+          console.log("Presentaciones recibidas:", presentationsData);
+          
+          // Asegurarse de que presentationsData sea un array
+          if (Array.isArray(presentationsData)) {
+            setPresentations(presentationsData);
+          } else if (presentationsData && Array.isArray(presentationsData.data)) {
+            setPresentations(presentationsData.data);
+          } else {
+            console.error("Formato de presentaciones inesperado:", presentationsData);
+            setPresentations([]);
+          }
+        } catch (presentationsError) {
+          console.error("Error al cargar presentaciones:", presentationsError);
+          setPresentations([]);
+          toast.error("No se pudieron cargar las presentaciones");
+        }
+        
       } catch (error) {
-        console.error('Error fetching product:', error)
-        toast.error("Error al cargar el producto")
+        console.error("Error al cargar datos del producto:", error);
+        toast.error("Error al cargar datos del producto");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
+  
+    fetchProductData();
+  }, [id]);
 
-    fetchProductData()
-  }, [id])
+  // Función para volver a la página anterior
+  const handleGoBack = () => {
+    navigate('/admin/products');
+  };
 
-  if (isLoading || !product) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    )
-  }
-
+  // Renderizado del componente
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-        <button
-          onClick={() => navigate("/admin/products")}
-          className="flex items-center text-text-light hover:text-primary transition-colors mb-4"
-        >
-          <FiArrowLeft className="mr-2" />
-          Regresar a Productos
-        </button>
-        <h1 className="text-3xl font-display font-bold text-text">
-          {product?.nombre}
-        </h1>
-        <p className="text-text-light mt-1">Ficha técnica del producto</p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <BasicInformation product={product} />
-        <div className="space-y-8">
-          <Conversions 
-            conversions={conversions}
-            onAddConversion={handleAddConversion}
-            onEditConversion={handleEditConversion}
-            onDeleteConversion={handleDeleteConversion}
-          />
-          <Presentations 
-            presentations={presentations}
-            onAddPresentation={handleAddPresentation}
-            onEditPresentation={handleEditPresentation}
-            onDeletePresentation={handleDeletePresentation}
-          />
+    <div className="container mx-auto px-4 py-6">
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
-      </div>
-      
-      <ConversionFormModal
-        isOpen={isConversionModalOpen}
-        onClose={() => setIsConversionModalOpen(false)}
-        onSubmit={handleSubmitConversion}
-        initialData={selectedConversion}
-      />
+      ) : (
+        <>
+          <div className="flex items-center mb-6">
+            <button
+              onClick={handleGoBack}
+              className="mr-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <FiArrowLeft size={20} />
+            </button>
+            <h1 className="text-2xl font-bold text-text">
+              {product?.nombre || 'Detalles del producto'}
+            </h1>
+          </div>
 
-      <PresentationFormModal
-        isOpen={isPresentationModalOpen}
-        onClose={() => setIsPresentationModalOpen(false)}
-        onSubmit={handleSubmitPresentation}
-        initialData={selectedPresentation}
-      />
-      
-      <ConfirmDialog
-        isOpen={isConfirmDialogOpen}
-        onClose={() => {
-          setIsConfirmDialogOpen(false)
-          setPendingFormData(null)
-          setConfirmAction(null)
-        }}
-        onConfirm={handleConfirmAction}
-        title={
-          confirmAction === 'conversion'
-            ? (selectedConversion ? "Confirmar Edición" : "Confirmar Creación")
-            : (selectedPresentation ? "Confirmar Edición" : "Confirmar Creación")
-        }
-        message={
-          confirmAction === 'conversion'
-            ? (selectedConversion 
-                ? "¿Estás seguro de que deseas guardar los cambios en esta conversión?"
-                : "¿Estás seguro de que deseas crear esta nueva conversión?")
-            : (selectedPresentation
-                ? "¿Estás seguro de que deseas guardar los cambios en esta presentación?"
-                : "¿Estás seguro de que deseas crear esta nueva presentación?")
-        }
-      />
-      
-      <ConfirmDialog
-        isOpen={isDeleteConversionDialogOpen}
-        onClose={() => setIsDeleteConversionDialogOpen(false)}
-        onConfirm={handleConfirmDeleteConversion}
-        title="Eliminar Conversión"
-        message="¿Estás seguro de que deseas eliminar esta conversión? Esta acción no se puede deshacer."
-      />
+          <div className="grid grid-cols-1 gap-6">
+            {product && (
+              <BasicInformation product={product} />
+            )}
 
-      <ConfirmDialog
-        isOpen={isDeletePresentationDialogOpen}
-        onClose={() => setIsDeletePresentationDialogOpen(false)}
-        onConfirm={handleConfirmDeletePresentation}
-        title="Eliminar Presentación"
-        message="¿Estás seguro de que deseas eliminar esta presentación? Esta acción no se puede deshacer."
-      />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Conversions 
+                conversions={Array.isArray(conversions) ? conversions : []} 
+                onAddConversion={handleAddConversion}
+                onEditConversion={handleEditConversion}
+                onDeleteConversion={handleDeleteConversion}
+              />
+              
+              <Presentations 
+                presentations={Array.isArray(presentations) ? presentations : []} 
+                onAddPresentation={handleAddPresentation}
+                onEditPresentation={handleEditPresentation}
+                onDeletePresentation={handleDeletePresentation}
+              />
+            </div>
+          </div>
+
+          {/* Modales y diálogos */}
+          {isConversionModalOpen && (
+            <ConversionFormModal
+              isOpen={isConversionModalOpen}
+              onClose={() => setIsConversionModalOpen(false)}
+              onSubmit={handleSubmitConversion}
+              conversion={selectedConversion}
+              productId={id}
+            />
+          )}
+
+          {isPresentationModalOpen && (
+            <PresentationFormModal
+              isOpen={isPresentationModalOpen}
+              onClose={() => setIsPresentationModalOpen(false)}
+              onSubmit={handleSubmitPresentation}
+              presentation={selectedPresentation}
+              productId={id}
+            />
+          )}
+
+          <ConfirmDialog
+            isOpen={isConfirmDialogOpen}
+            onClose={() => setIsConfirmDialogOpen(false)}
+            onConfirm={handleConfirmAction}
+            title={`Confirmar ${confirmAction === 'conversion' ? 'conversión' : 'presentación'}`}
+            message={`¿Estás seguro de que deseas ${selectedConversion || selectedPresentation ? 'actualizar' : 'crear'} esta ${confirmAction === 'conversion' ? 'conversión' : 'presentación'}?`}
+            confirmText="Guardar"
+            cancelText="Cancelar"
+          />
+
+          <ConfirmDialog
+            isOpen={isDeleteConversionDialogOpen}
+            onClose={() => setIsDeleteConversionDialogOpen(false)}
+            onConfirm={handleConfirmDeleteConversion}
+            title="Eliminar conversión"
+            message="¿Estás seguro de que deseas eliminar esta conversión? Esta acción no se puede deshacer."
+            confirmText="Eliminar"
+            cancelText="Cancelar"
+            isDanger
+          />
+
+          <ConfirmDialog
+            isOpen={isDeletePresentationDialogOpen}
+            onClose={() => setIsDeletePresentationDialogOpen(false)}
+            onConfirm={handleConfirmDeletePresentation}
+            title="Eliminar presentación"
+            message="¿Estás seguro de que deseas eliminar esta presentación? Esta acción no se puede deshacer."
+            confirmText="Eliminar"
+            cancelText="Cancelar"
+            isDanger
+          />
+        </>
+      )}
     </div>
-  )
+  );
 }

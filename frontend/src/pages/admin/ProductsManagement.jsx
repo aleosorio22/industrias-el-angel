@@ -156,14 +156,34 @@ export default function ProductsManagement() {
   const fetchInitialData = async () => {
     try {
       setIsLoading(true)
-      const [productsData, categoriesData, unitsData] = await Promise.all([
+      const [productsResponse, categoriesResponse, unitsResponse] = await Promise.all([
         productService.getAllProducts(filters.estado === "inactivo" || filters.estado === "all"),
         categoryService.getAllCategories(),
         unitService.getAllUnits()
       ])
 
-      let filteredProducts = productsData
+      // Verificar que la respuesta de productos sea exitosa y contenga datos
+      let filteredProducts = []
+      if (productsResponse.success && Array.isArray(productsResponse.data)) {
+        filteredProducts = productsResponse.data
+      } else if (Array.isArray(productsResponse)) {
+        // Si la respuesta es directamente un array
+        filteredProducts = productsResponse
+      } else {
+        console.error("Formato de respuesta inesperado:", productsResponse)
+        setError("Formato de respuesta de productos inesperado")
+        setProducts([])
+        return
+      }
       
+      // Verificar respuestas de categorías y unidades
+      const categoriesData = categoriesResponse.success ? categoriesResponse.data : 
+                            (Array.isArray(categoriesResponse) ? categoriesResponse : [])
+      
+      const unitsData = unitsResponse.success ? unitsResponse.data : 
+                       (Array.isArray(unitsResponse) ? unitsResponse : [])
+      
+      // Aplicar filtros
       if (filters.estado !== "all") {
         filteredProducts = filteredProducts.filter(
           product => product.estado === filters.estado
@@ -185,12 +205,21 @@ export default function ProductsManagement() {
         )
       }
 
+      // Actualizar el estado con los datos filtrados
       setProducts(filteredProducts)
       setCategories(categoriesData)
       setUnits(unitsData)
+      
+      // Registrar en consola para depuración
+      console.log("Productos cargados:", filteredProducts.length)
+      console.log("Categorías cargadas:", categoriesData.length)
+      console.log("Unidades cargadas:", unitsData.length)
+      
     } catch (err) {
-      setError(err.message)
-      toast.error("Error al cargar los datos")
+      console.error("Error completo al cargar datos:", err)
+      setError(err.message || "Error desconocido al cargar los datos")
+      toast.error("Error al cargar los datos: " + (err.message || "Error desconocido"))
+      setProducts([])
     } finally {
       setIsLoading(false)
     }
