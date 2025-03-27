@@ -230,6 +230,37 @@ class OrderController {
             });
         }
     }
+
+    /**
+     * Obtiene el consolidado de producción para una fecha específica
+     * @param {Object} req - Objeto de solicitud
+     * @param {Object} res - Objeto de respuesta
+     */
+    static async getProductionConsolidated(req, res) {
+        try {
+            const { date } = req.params;
+
+            if (!date) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Se requiere una fecha para el consolidado'
+                });
+            }
+
+            const consolidated = await OrderModel.getProductionConsolidated(date);
+            
+            res.json({
+                success: true,
+                data: consolidated
+            });
+        } catch (error) {
+            console.error('Error al obtener consolidado:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error al obtener el consolidado de producción'
+            });
+        }
+    }
 }
 
 module.exports = OrderController;
