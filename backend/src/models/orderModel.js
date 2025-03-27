@@ -92,7 +92,8 @@ class OrderModel {
         let query = `
             SELECT p.*, 
                    c.nombre as cliente_nombre, 
-                   s.nombre as sucursal_nombre
+                   s.nombre as sucursal_nombre,
+                   (SELECT COUNT(*) FROM pedido_detalle WHERE pedido_id = p.id) as total_productos
             FROM pedidos p
             LEFT JOIN clientes c ON p.cliente_id = c.id
             LEFT JOIN sucursales s ON p.sucursal_id = s.id

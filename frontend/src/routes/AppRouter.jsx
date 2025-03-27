@@ -18,6 +18,8 @@ import ProductsManagement from "../pages/admin/ProductsManagement";
 import ProductDetails from "../pages/admin/ProductDetails";
 import ClientsManagement from "../pages/admin/ClientsManagement";
 import ClientDetails from "../pages/admin/ClientDetails";
+import OrdersManagement from "../pages/admin/OrdersManagement"; // Importar el nuevo componente
+import AdminOrderDetail from "../pages/admin/OrderDetail"; // Importar el nuevo componente
 
 //pages de usuarios
 import UserDashboard from "../pages/user/UserDashboard";
@@ -61,6 +63,8 @@ function AppRouter() {
             <Route path="/admin/products/:id/details" element={<ProductDetails />} />
             <Route path="/admin/clients" element={<ClientsManagement />} />
             <Route path="/admin/clients/:id/details" element={<ClientDetails />} />
+            <Route path="/admin/orders" element={<OrdersManagement />} /> {/* Agregar la ruta */}
+            <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         ) : (

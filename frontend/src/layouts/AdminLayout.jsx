@@ -108,7 +108,7 @@ function MainContent() {
       </header>
 
       {/* Page content */}
-      <main className="p-5 md:p-8">
+      <main className="p-2 sm:p-5 md:p-8">
         <Outlet />
       </main>
     </div>
