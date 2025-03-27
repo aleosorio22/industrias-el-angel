@@ -24,4 +24,7 @@ router.get('/:id', orderController.getOrderById);
 // Actualizar el estado de un pedido (solo admin)
 router.patch('/:id/status', isAdmin, orderController.updateOrderStatus);
 
+// Obtener consolidado de producción por fecha (solo admin)
+router.get('/production-consolidated/:date', isAdmin, orderController.getProductionConsolidated);
+
 module.exports = router;
