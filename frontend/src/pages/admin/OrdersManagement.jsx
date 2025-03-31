@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FiShoppingCart, FiFilter } from 'react-icons/fi';
+import { FiShoppingCart, FiFilter, FiPieChart } from 'react-icons/fi';
 import OrderService from '../../services/OrderService';
 import OrdersList from '../../components/admin/orders/OrdersList';
 import OrdersFilter from '../../components/admin/orders/OrdersFilter';
+import ProductionConsolidated from '../../components/admin/orders/ProductionConsolidated';
 
 export default function OrdersManagement() {
   const [orders, setOrders] = useState([]);
@@ -12,6 +13,10 @@ export default function OrdersManagement() {
   const [dateFilter, setDateFilter] = useState(formatDateForInput(new Date())); // Fecha actual por defecto
   const [statusFilter, setStatusFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [showConsolidated, setShowConsolidated] = useState(false);
+  const [consolidatedData, setConsolidatedData] = useState(null);
+  const [isLoadingConsolidated, setIsLoadingConsolidated] = useState(false);
+  const [consolidatedError, setConsolidatedError] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -130,6 +135,24 @@ export default function OrdersManagement() {
     }
   };
 
+  const handleGetConsolidated = async () => {
+    try {
+      setIsLoadingConsolidated(true);
+      setConsolidatedError(null);
+      const response = await OrderService.getProductionConsolidated(dateFilter);
+      if (response.success) {
+        setConsolidatedData(response.data);
+        setShowConsolidated(true);
+      } else {
+        setConsolidatedError(response.message);
+      }
+    } catch (err) {
+      setConsolidatedError(err.message || 'Error al obtener el consolidado');
+    } finally {
+      setIsLoadingConsolidated(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 max-w-lg">
       <div className="bg-white rounded-lg shadow-md mb-4">
@@ -138,13 +161,22 @@ export default function OrdersManagement() {
             <FiShoppingCart className="mr-2" />
             Pedidos
           </h1>
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className="p-2 rounded-full hover:bg-gray-100"
-            aria-label="Filtrar"
-          >
-            <FiFilter />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleGetConsolidated}
+              className="p-2 rounded-full hover:bg-green-50 text-green-600"
+              aria-label="Consolidado de producción"
+            >
+              <FiPieChart />
+            </button>
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className="p-2 rounded-full hover:bg-gray-100"
+              aria-label="Filtrar"
+            >
+              <FiFilter />
+            </button>
+          </div>
         </div>
         
         <OrdersFilter 
@@ -164,6 +196,15 @@ export default function OrdersManagement() {
           formatStatus={formatStatus}
         />
       </div>
+
+      {showConsolidated && (
+        <ProductionConsolidated
+          data={consolidatedData}
+          onClose={() => setShowConsolidated(false)}
+          isLoading={isLoadingConsolidated}
+          error={consolidatedError}
+        />
+      )}
     </div>
   );
 }
