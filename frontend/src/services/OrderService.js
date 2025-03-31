@@ -89,6 +89,22 @@ const OrderService = {
     } catch (error) {
       throw error.response ? error.response.data : error;
     }
+  },
+
+  getProductionConsolidated: async (date) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/orders/production-consolidated/${date}`,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error getting production consolidated:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Error al obtener el consolidado de producción"
+      };
+    }
   }
 };
 
