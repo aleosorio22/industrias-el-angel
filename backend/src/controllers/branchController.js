@@ -98,7 +98,9 @@ exports.getMyBranches = async (req, res) => {
         );
         
         if (client.length === 0) {
-            return res.status(404).json({ message: 'No tienes un cliente asociado' });
+            // En lugar de devolver un error, devolvemos un array vacío
+            // para que el frontend pueda manejarlo correctamente
+            return res.json([]);
         }
         
         const branches = await BranchModel.getByClientId(client[0].id, false);

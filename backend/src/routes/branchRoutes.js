@@ -12,7 +12,7 @@ router.put('/:id', authMiddleware, isAdmin, branchController.updateBranch);
 router.delete('/:id', authMiddleware, isAdmin, branchController.deleteBranch);
 router.patch('/:id/restore', authMiddleware, isAdmin, branchController.restoreBranch);
 
-// Ruta para usuarios normales
+// Ruta para usuarios normales - Esta es la ruta que debemos usar
 router.get('/mis-sucursales/perfil', authMiddleware, branchController.getMyBranches);
 
 module.exports = router;

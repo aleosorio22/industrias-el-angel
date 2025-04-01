@@ -92,7 +92,8 @@ class OrderModel {
         let query = `
             SELECT p.*, 
                    c.nombre as cliente_nombre, 
-                   s.nombre as sucursal_nombre
+                   s.nombre as sucursal_nombre,
+                   (SELECT COUNT(*) FROM pedido_detalle WHERE pedido_id = p.id) as total_productos
             FROM pedidos p
             LEFT JOIN clientes c ON p.cliente_id = c.id
             LEFT JOIN sucursales s ON p.sucursal_id = s.id
@@ -208,6 +209,84 @@ class OrderModel {
         `, [clienteId]);
         
         return orders;
+    }
+
+    /**
+     * Obtiene el consolidado de producción para una fecha específica
+     * @param {string} date - Fecha en formato YYYY-MM-DD
+     * @returns {Promise<Array>} - Consolidado de producción
+     */
+    static async getProductionConsolidated(date) {
+        const query = `
+            WITH pedidos_del_dia AS (
+                SELECT pd.producto_id,
+                       p.nombre AS producto_nombre,
+                       p.unidad_base_id,
+                       pd.presentacion_id,
+                       pd.cantidad,
+                       pp.cantidad AS unidades_por_presentacion
+                FROM pedidos pe
+                JOIN pedido_detalle pd ON pe.id = pd.pedido_id
+                JOIN productos p ON pd.producto_id = p.id
+                JOIN producto_presentacion pp ON (pd.producto_id = pp.producto_id AND pd.presentacion_id = pp.presentacion_id)
+                WHERE DATE(pe.fecha) = ?
+                AND pe.estado != 'cancelado'
+            ),
+            total_unidades AS (
+                SELECT 
+                    producto_id,
+                    producto_nombre,
+                    unidad_base_id,
+                    SUM(cantidad * unidades_por_presentacion) as total_unidades
+                FROM pedidos_del_dia
+                GROUP BY producto_id, producto_nombre, unidad_base_id
+            ),
+            conversiones AS (
+                SELECT 
+                    cu.producto_id,
+                    u1.nombre AS unidad_origen,
+                    u2.nombre AS unidad_destino,
+                    cu.factor_conversion
+                FROM conversion_unidades cu
+                JOIN unidades u1 ON cu.unidad_origen_id = u1.id
+                JOIN unidades u2 ON cu.unidad_destino_id = u2.id
+            )
+            SELECT 
+                t.producto_nombre,
+                t.total_unidades AS unidades_totales,
+                u.nombre AS unidad_base,
+                ROUND(t.total_unidades / MAX(CASE 
+                    WHEN c.unidad_origen = 'Lata' AND c.unidad_destino = 'Unidad'
+                    THEN c.factor_conversion 
+                END), 2) AS latas_necesarias,
+                ROUND(
+                    (t.total_unidades / MAX(CASE 
+                        WHEN c.unidad_origen = 'Lata' AND c.unidad_destino = 'Unidad'
+                        THEN c.factor_conversion 
+                    END))
+                    / MAX(CASE 
+                        WHEN c.unidad_origen = 'Arroba' AND c.unidad_destino = 'Lata'
+                        THEN c.factor_conversion 
+                    END) * 25, 2
+                ) AS libras_necesarias,
+                ROUND(
+                    (t.total_unidades / MAX(CASE 
+                        WHEN c.unidad_origen = 'Lata' AND c.unidad_destino = 'Unidad'
+                        THEN c.factor_conversion 
+                    END))
+                    / MAX(CASE 
+                        WHEN c.unidad_origen = 'Arroba' AND c.unidad_destino = 'Lata'
+                        THEN c.factor_conversion 
+                    END), 2
+                ) AS arrobas_necesarias
+            FROM total_unidades t
+            JOIN unidades u ON t.unidad_base_id = u.id
+            LEFT JOIN conversiones c ON t.producto_id = c.producto_id
+            GROUP BY t.producto_nombre, t.total_unidades, u.nombre
+            ORDER BY t.producto_nombre`;
+
+        const [results] = await db.execute(query, [date]);
+        return results;
     }
 }
 

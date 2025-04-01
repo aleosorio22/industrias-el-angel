@@ -19,9 +19,16 @@ const productService = {
         `${API_BASE_URL}/products?includeInactive=${includeInactive}`,
         getAuthHeaders()
       );
-      return response.data;
+      return {
+        success: true,
+        data: response.data
+      };
     } catch (error) {
-      throw error.response ? error.response.data : error;
+      console.error("Error fetching products:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Error al obtener productos"
+      };
     }
   },
 

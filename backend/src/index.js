@@ -9,6 +9,7 @@ const categoryRoutes = require('./routes/categoryRoutes');
 const unitRoutes = require('./routes/unitRoutes');
 const presentationRoutes = require('./routes/presentationRoutes');
 const productRoutes = require('./routes/productRoutes');
+const productPresentations = require('./routes/presentationProductRoutes')
 const conversionRoutes = require('./routes/conversionRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const branchRoutes = require ('./routes/branchRoutes')
@@ -28,6 +29,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/units', unitRoutes);
 app.use('/api/presentations', presentationRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/product-presentations', productPresentations)
 app.use('/api/conversions', conversionRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/branches', branchRoutes);
