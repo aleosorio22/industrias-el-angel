@@ -25,26 +25,19 @@ const BranchService = {
     }
   },
 
-  // Parece que este método no existe o tiene un nombre diferente
-  // Necesitamos agregar el método getMyBranches
-  getUserBranches: async () => {
+  //Obtener sucursales por cliente id
+  getBranchesByClientId: async (clientId, includeInactive = false) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/branches/mis-sucursales/perfil`,
+        `${API_BASE_URL}/branches/cliente/${clientId}?includeInactive=${includeInactive}`,
         getAuthHeaders()
       );
-      return {
-        success: true,
-        data: response.data
-      };
+      return response.data;
     } catch (error) {
-      console.error("Error al obtener sucursales del usuario:", error);
-      return {
-        success: false,
-        message: error.response?.data?.message || "Error al obtener sucursales"
-      };
+      throw error.response ? error.response.data : error;
     }
   },
+
 
   // Agregar el método getMyBranches como alias de getUserBranches
   getMyBranches: async () => {
