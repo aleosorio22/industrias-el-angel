@@ -160,18 +160,8 @@ export default function UserOrders() {
           </>
         ) : (
           <EmptyState 
-            icon={<FiPackage className="h-12 w-12 text-gray-300" />}
-            title="No tienes pedidos aún"
-            description="Comienza realizando tu primer pedido con nosotros"
-            action={
-              <Link
-                to="/user/orders/new"
-                className="inline-flex items-center px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-              >
-                <FiPlus className="mr-2" />
-                Crear Pedido
-              </Link>
-            }
+            message="No tienes pedidos aún. Comienza realizando tu primer pedido con nosotros"
+            icon={FiPackage}
           />
         )}
       </main>
