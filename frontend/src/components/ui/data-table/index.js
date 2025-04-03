@@ -1,4 +1,10 @@
-export { default as DataTable } from './DataTable'
-export { default as SearchAndFilter } from './SearchAndFilter'
-export { default as EmptyState } from './EmptyState'
+import DataTable from './DataTable'
+import SearchAndFilter from './SearchAndFilter'
+import EmptyState from './EmptyState'
+
+export {
+  DataTable,
+  SearchAndFilter,
+  EmptyState
+}
 
