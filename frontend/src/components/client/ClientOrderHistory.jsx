@@ -28,12 +28,9 @@ export default function ClientOrderHistory({ clientId, onRefresh }) {
       setIsLoading(true);
       setError(null);
       const data = await OrderService.getOrdersByClientId(clientId);
-      console.log('ClientId recibido:', clientId); // Agregar este log
-      console.log('Datos recibidos de la API:', data);
       
       // Verificar la estructura de los datos
       const ordersArray = Array.isArray(data) ? data : data.data || [];
-      console.log('Array de órdenes procesado:', ordersArray); // Agregar este log
       
       setOrders(ordersArray);
       filterOrders(ordersArray);
@@ -47,7 +44,6 @@ export default function ClientOrderHistory({ clientId, onRefresh }) {
   };
 
   const filterOrders = (ordersToFilter = orders) => {
-    console.log('Órdenes a filtrar:', ordersToFilter);
     let filtered = [...ordersToFilter];
 
     if (!dateRange.startDate && !dateRange.endDate) {
@@ -81,8 +77,6 @@ export default function ClientOrderHistory({ clientId, onRefresh }) {
       }
     }
 
-    console.log('Fechas seleccionadas:', dateRange);
-    console.log('Órdenes filtradas:', filtered);
     setFilteredOrders(filtered);
   };
 

@@ -210,11 +210,6 @@ export default function ProductsManagement() {
       setCategories(categoriesData)
       setUnits(unitsData)
       
-      // Registrar en consola para depuración
-      console.log("Productos cargados:", filteredProducts.length)
-      console.log("Categorías cargadas:", categoriesData.length)
-      console.log("Unidades cargadas:", unitsData.length)
-      
     } catch (err) {
       console.error("Error completo al cargar datos:", err)
       setError(err.message || "Error desconocido al cargar los datos")
