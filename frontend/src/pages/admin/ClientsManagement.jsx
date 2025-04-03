@@ -7,7 +7,7 @@ import { DataTable, SearchAndFilter } from "../../components/ui/data-table"
 import ConfirmDialog from "../../components/ConfirmDialog"
 import ClientFormModal from "../../components/client/ClientFormModal"
 import clientService from "../../services/ClientService"
-import userService from "../../services/UserService"
+import userService from "../../services/userService"
 import { toast } from "react-hot-toast"
 
 export default function ClientsManagement() {
