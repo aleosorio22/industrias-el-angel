@@ -13,22 +13,28 @@ const getAuthHeaders = () => {
 };
 
 const OrderService = {
-  getAllOrders: async () => {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/orders`,
-        getAuthHeaders()
-      );
-      return response.data;
-    } catch (error) {
-      throw error.response ? error.response.data : error;
-    }
-  },
-
   getMyOrders: async () => {
     try {
       const response = await axios.get(
         `${API_BASE_URL}/orders/mis-pedidos`,
+        getAuthHeaders()
+      );
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al cargar los pedidos'
+      };
+    }
+  },
+  getAllOrders: async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/orders`,
         getAuthHeaders()
       );
       return response.data;
