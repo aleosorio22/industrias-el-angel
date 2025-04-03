@@ -5,7 +5,7 @@ import OrderService from "../../services/OrderService";
 import OrderCard from "../../components/user/orders/OrderCard";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 // Importamos los componentes de la carpeta ui/data-table
-import { EmptyState } from "../../components/ui/data-table/Index";
+import { EmptyState } from "../../components/ui/data-table";
 
 export default function UserOrders() {
   const location = useLocation();
