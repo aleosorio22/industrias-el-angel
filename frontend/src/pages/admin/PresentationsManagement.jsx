@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { FiPlus, FiEdit2, FiTrash2, FiPackage } from "react-icons/fi"
-import { DataTable, SearchAndFilter } from "../../components/ui/data-table"
+import DataTable from "../../components/ui/data-table/DataTable"
+import SearchAndFilter from "../../components/ui/data-table/SearchAndFilter"
 import ConfirmDialog from "../../components/ConfirmDialog"
 import PresentationFormModal from "../../components/PresentationFormModal"
 import presentationService from "../../services/PresentationService"
