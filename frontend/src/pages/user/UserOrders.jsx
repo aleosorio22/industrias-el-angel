@@ -38,18 +38,21 @@ export default function UserOrders() {
       
       const response = await OrderService.getMyOrders();
       
-      if (response.success) {
-        // Ordenar del más reciente al más antiguo
-        const sortedOrders = response.data.sort((a, b) => 
-          new Date(b.fecha) - new Date(a.fecha)
+      if (response.success && response.data) {
+        // Si hay datos y es un array, ordenarlos
+        const ordersArray = Array.isArray(response.data) ? response.data : [];
+        const sortedOrders = ordersArray.sort((a, b) => 
+          new Date(b.fecha || b.created_at) - new Date(a.fecha || a.created_at)
         );
         
         setOrders(sortedOrders);
       } else {
-        setError("No se pudieron cargar los pedidos");
+        // Si no hay datos, inicializar con array vacío
+        setOrders([]);
       }
     } catch (err) {
       console.error("Error al cargar pedidos:", err);
+      setOrders([]);
       setError(err.message || "Error al cargar los pedidos");
     } finally {
       setIsLoading(false);
