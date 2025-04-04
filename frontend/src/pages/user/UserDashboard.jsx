@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../../context/AuthContext"
 import clientService from "../../services/ClientService"
 import branchService from "../../services/BranchService"
+import OrderService from "../../services/OrderService" // Añadimos esta importación
+import RecentOrders from "../../components/user/RecentOrders" // Añadimos esta importación
 
 // Componentes
 import ClientInfoCard from "../../components/user/ClientInfoCard"
@@ -14,6 +16,7 @@ export default function UserDashboard() {
   const { auth } = useAuth()  // Cambiado de user a auth
   const [clientData, setClientData] = useState(null)
   const [branches, setBranches] = useState([])
+  const [recentOrders, setRecentOrders] = useState([]) // Añadimos este estado
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   
@@ -37,13 +40,23 @@ export default function UserDashboard() {
         setIsLoading(true)
         setError(null)
         
-        // Fetch client data
-        const clientResponse = await clientService.getMyClientData()
-        setClientData(clientResponse)
+        // Fetch all data in parallel
+        const [clientResponse, branchesResponse, ordersResponse] = await Promise.all([
+          clientService.getMyClientData(),
+          branchService.getMyBranches(),
+          OrderService.getMyOrders()
+        ]);
+
+        setClientData(clientResponse);
+        setBranches(branchesResponse);
         
-        // Fetch branches
-        const branchesResponse = await branchService.getMyBranches()
-        setBranches(branchesResponse)
+        // Procesamos los pedidos recientes
+        if (ordersResponse.success && ordersResponse.data.data) {
+          const sortedOrders = [...ordersResponse.data.data]
+            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+            .slice(0, 2); // Solo tomamos los últimos 2 pedidos
+          setRecentOrders(sortedOrders);
+        }
       } catch (err) {
         setError(err.message || "Error al cargar los datos")
         console.error(err)
@@ -95,20 +108,8 @@ export default function UserDashboard() {
         {/* Acciones rápidas */}
         <QuickActions />
         
-        {/* Pedidos recientes */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Pedidos recientes</h2>
-            <Link to="/user/orders" className="text-green-500 text-sm">Ver todos</Link>
-          </div>
-          
-          <div className="bg-gray-50 rounded-lg p-6 text-center">
-            <FiBarChart2 className="mx-auto h-10 w-10 text-gray-300" />
-            <p className="mt-3 text-gray-500">
-              Próximamente podrás ver tus pedidos recientes aquí
-            </p>
-          </div>
-        </div>
+        {/* Pedidos recientes - Reemplazamos el div anterior por el nuevo componente */}
+        <RecentOrders orders={recentOrders} />
         
         {/* Sucursales */}
         <BranchesPreview branches={branches} />

@@ -43,7 +43,7 @@ export default function NewOrder() {
       // Modificar para cargar solo los productos y las sucursales del usuario actual
       const [productsResponse, branchesResponse] = await Promise.all([
         ProductService.getAllProducts(),
-        BranchService.getUserBranches() // Cambiar a un método que obtenga solo las sucursales del usuario
+        BranchService.getMyBranches() // Cambiar a un método que obtenga solo las sucursales del usuario
       ]);
 
       if (productsResponse.success) {
