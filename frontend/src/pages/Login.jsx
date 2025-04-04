@@ -45,11 +45,15 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Panel izquierdo - Decorativo en desktop, oculto en móvil */}
+      {/* Panel izquierdo - Decorativo en desktop */}
       <div className="hidden md:flex md:w-1/2 bg-[#1e1e1e] text-white flex-col justify-center items-center p-8">
         <div className="max-w-md mx-auto text-center">
-          <div className="mb-6 inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/20">
-            <img src={logoIndustrias} alt="Industrias El Ángel" className="w-16 h-16" />
+          <div className="mb-6 inline-flex items-center justify-center w-24 h-24 rounded-full bg-primary/20 overflow-hidden">
+            <img 
+              src={logoIndustrias} 
+              alt="Industrias El Ángel" 
+              className="w-full h-full object-cover"
+            />
           </div>
           <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">Industrias El Ángel</h1>
           <p className="text-white/70 text-lg mb-8">Sistema interno de administración y gestión</p>
@@ -87,8 +91,12 @@ export default function Login() {
         <div className="w-full max-w-md">
           {/* Logo para móvil */}
           <div className="md:hidden flex flex-col items-center mb-8">
-            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-              <img src={logoIndustrias} alt="Industrias El Ángel Logo" className="w-12 h-12" />
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 overflow-hidden">
+              <img 
+                src={logoIndustrias} 
+                alt="Industrias El Ángel Logo" 
+                className="w-full h-full object-cover"
+              />
             </div>
             <h1 className="text-2xl font-display font-bold text-center">Industrias El Ángel</h1>
             <p className="text-muted-foreground text-center mt-2">Sistema interno de administración</p>
