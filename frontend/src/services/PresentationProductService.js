@@ -15,11 +15,7 @@ const getAuthHeaders = () => {
 const presentationProductService = {
   getProductPresentations: async (productId) => {
     try {
-      console.log(`Obteniendo presentaciones para producto ID: ${productId}`);
       const response = await axios.get(`${API_BASE_URL}/product-presentations/product/${productId}`, getAuthHeaders());
-      
-      // Verificar la estructura de la respuesta y registrarla para depuración
-      console.log('Respuesta de presentaciones:', response.data);
       
       // Si la respuesta es un array, devolverlo directamente
       if (Array.isArray(response.data)) {

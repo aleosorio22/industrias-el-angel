@@ -14,18 +14,13 @@ const UserBranches = () => {
         setLoading(true);
         const response = await BranchService.getMyBranches();
         
-        // Asegurarse de que response.data sea un array
-        if (response.success && Array.isArray(response.data)) {
+        if (response.success) {
           setBranches(response.data);
         } else {
-          // Si no es un array, establecer un array vacío
-          setBranches([]);
           setError('No se pudieron cargar las sucursales');
         }
       } catch (err) {
-        console.error('Error al cargar sucursales:', err);
         setError('Error al cargar sucursales');
-        setBranches([]);
       } finally {
         setLoading(false);
       }

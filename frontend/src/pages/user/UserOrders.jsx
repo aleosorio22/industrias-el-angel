@@ -37,17 +37,14 @@ export default function UserOrders() {
       setError(null);
       
       const response = await OrderService.getMyOrders();
+      const ordersArray = response.success && response.data.data;
       
-      if (response.success && response.data) {
-        // Si hay datos y es un array, ordenarlos
-        const ordersArray = Array.isArray(response.data) ? response.data : [];
-        const sortedOrders = ordersArray.sort((a, b) => 
-          new Date(b.fecha || b.created_at) - new Date(a.fecha || a.created_at)
+      if (Array.isArray(ordersArray) && ordersArray.length > 0) {
+        const sortedOrders = [...ordersArray].sort((a, b) => 
+          new Date(b.fecha) - new Date(a.fecha)
         );
-        
         setOrders(sortedOrders);
       } else {
-        // Si no hay datos, inicializar con array vacío
         setOrders([]);
       }
     } catch (err) {
@@ -134,33 +131,21 @@ export default function UserOrders() {
         {isLoading ? (
           <LoadingSpinner />
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4 flex justify-between items-center">
-            <div className="flex items-center">
-              <FiAlertCircle className="mr-2" />
-              <span>{error}</span>
-            </div>
-            <button 
-              onClick={fetchOrders} 
-              className="text-red-700 hover:bg-red-100 p-1 rounded-full"
-              title="Reintentar"
-            >
-              <FiRefreshCw />
-            </button>
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4">
+            <span>{error}</span>
           </div>
-        ) : orders.length > 0 ? (
-          <>
-            <div>
-              {currentOrders.map(order => (
-                <OrderCard key={order.id} order={order} />
-              ))}
-            </div>
+        ) : orders && orders.length > 0 ? (
+          <div className="space-y-4">
+            {orders.map(order => (
+              <OrderCard key={order.id} order={order} />
+            ))}
             
             <PaginationSimple 
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={handlePageChange}
             />
-          </>
+          </div>
         ) : (
           <EmptyState 
             message="No tienes pedidos aún. Comienza realizando tu primer pedido con nosotros"
