@@ -4,16 +4,16 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 
-const userRoutes = require('./routes/userRoutes');
-const categoryRoutes = require('./routes/categoryRoutes');
-const unitRoutes = require('./routes/unitRoutes');
-const presentationRoutes = require('./routes/presentationRoutes');
-const productRoutes = require('./routes/productRoutes');
-const productPresentations = require('./routes/presentationProductRoutes')
-const conversionRoutes = require('./routes/conversionRoutes');
-const clientRoutes = require('./routes/clientRoutes');
-const branchRoutes = require ('./routes/branchRoutes')
-const orderRoutes = require('./routes/orderRoutes')
+const userRoutes = require('./modules/sistema/routes/userRoutes');
+const categoryRoutes = require('./modules/sistema/routes/categoryRoutes');
+const unitRoutes = require('./modules/sistema/routes/unitRoutes');
+const presentationRoutes = require('./modules/sistema/routes/presentationRoutes');
+const productRoutes = require('./modules/sistema/routes/productRoutes');
+const productPresentations = require('./modules/sistema/routes/presentationProductRoutes')
+const conversionRoutes = require('./modules/sistema/routes/conversionRoutes');
+const clientRoutes = require('./modules/sistema/routes/clientRoutes');
+const branchRoutes = require ('./modules/sistema/routes/branchRoutes')
+const orderRoutes = require('./modules/sistema/routes/orderRoutes')
 
 const app = express();
 

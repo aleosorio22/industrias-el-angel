@@ -1,4 +1,4 @@
-const db = require('../config/database');
+const db = require('../../../core/config/database');
 
 class PresentationProductModel {
     static async create(presentationData) {

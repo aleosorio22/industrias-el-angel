@@ -1,5 +1,5 @@
 const BranchModel = require('../models/branchModel');
-const db = require('../config/database');
+const db = require('../../../core/config/database');
 
 exports.createBranch = async (req, res) => {
     try {

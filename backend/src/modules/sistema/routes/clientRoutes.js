@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const clientController = require('../controllers/clientController');
-const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
+const { authMiddleware, isAdmin } = require('../../../core/middlewares/authMiddleware');
 
 // Rutas que requieren autenticación de administrador
 router.post('/', authMiddleware, isAdmin, clientController.createClient);
