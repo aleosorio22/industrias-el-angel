@@ -1,6 +1,6 @@
 const OrderModel = require('../models/orderModel');
 const ClientModel = require('../models/clientModel');
-const db = require('../config/database'); 
+const db = require('../../../core/config/database'); 
 
 class OrderController {
     /**

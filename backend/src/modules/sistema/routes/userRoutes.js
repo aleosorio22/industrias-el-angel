@@ -10,9 +10,9 @@ const {
     getProfile,
     getAvailableUsers
 } = require('../controllers/userController');
-const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
-const { validateUser, validatePasswordUpdate } = require('../middlewares/validateMiddleware');
-const { isOwnerOrAdmin } = require('../middlewares/ownershipMiddleware');
+const { authMiddleware, isAdmin } = require('../../../core/middlewares/authMiddleware');
+const { validateUser, validatePasswordUpdate } = require('../../../core/middlewares/validateMiddleware');
+const { isOwnerOrAdmin } = require('../../../core/middlewares/ownershipMiddleware');
 
 const router = express.Router();
 

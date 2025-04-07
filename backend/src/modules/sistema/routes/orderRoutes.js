@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
-const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
+const { authMiddleware, isAdmin } = require('../../../core/middlewares/authMiddleware');
 
 // Todas las rutas requieren autenticación
 router.use(authMiddleware);

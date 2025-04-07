@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
-const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
+const { authMiddleware, isAdmin } = require('../../../core/middlewares/authMiddleware');
 
 // Rutas protegidas
 router.use(authMiddleware);

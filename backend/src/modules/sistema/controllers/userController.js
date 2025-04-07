@@ -1,7 +1,7 @@
 const userModel = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../config/database'); // Agregar esta línea
+const db = require('../../../core/config/database'); // Agregar esta línea
 
 exports.login = async (req, res) => {
     try {
