@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { FiArrowLeft, FiCalendar, FiUser, FiMapPin, FiPackage, FiClipboard, FiTruck } from 'react-icons/fi';
 import OrderService from '../../services/OrderService';
+import { formatDate } from '../../utils/dateUtils';
 
+// Eliminar cualquier función formatDate local
 export default function OrderDetail() {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
@@ -31,11 +33,8 @@ export default function OrderDetail() {
   };
 
   // Formatear fecha para mostrar
-  const formatDate = (dateString) => {
-    const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
-  };
-
+  // Eliminar la función formatDate local si existe
+  
   // Obtener color de badge según estado
   const getStatusColor = (status) => {
     switch (status) {

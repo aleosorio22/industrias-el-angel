@@ -3,6 +3,7 @@ import { FiPackage, FiFilter } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import OrderService from "../../services/OrderService";
 import OrderCard from "./OrderCard";
+import { formatDate } from '../../utils/dateUtils';
 
 export default function ClientOrderHistory({ clientId, onRefresh }) {
   const [orders, setOrders] = useState([]);
@@ -159,11 +160,14 @@ export default function ClientOrderHistory({ clientId, onRefresh }) {
       ) : (
         <div className="space-y-4">
           {filteredOrders.map((order) => (
+            // Eliminar la función formatDate local
+            
+            // En el render, actualizar el paso de props a OrderCard
             <OrderCard
               key={order.id}
               order={order}
-              formatDate={formatDate}
               getStatusColor={getStatusColor}
+              // Eliminar el prop formatDate ya que ahora se importa directamente en OrderCard
             />
           ))}
         </div>

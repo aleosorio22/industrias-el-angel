@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiChevronRight, FiCalendar, FiUser, FiPackage, FiMapPin } from 'react-icons/fi';
+import { formatDate } from '../../../utils/dateUtils';
 
-const OrdersList = ({ orders, isLoading, error, formatDate, getStatusColor, formatStatus }) => {
+// Modificar props para eliminar formatDate
+const OrdersList = ({ orders, isLoading, error, getStatusColor, formatStatus }) => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
