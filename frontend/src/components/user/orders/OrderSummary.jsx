@@ -1,4 +1,5 @@
 import { FiArrowLeft, FiCheck, FiMapPin, FiFileText, FiCalendar } from "react-icons/fi";
+import { formatDate } from '../../../utils/dateUtils';
 
 export default function OrderSummary({ 
   orderItems, 

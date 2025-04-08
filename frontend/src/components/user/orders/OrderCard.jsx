@@ -2,14 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiPackage, FiCalendar, FiChevronRight } from 'react-icons/fi';
 import OrderStatusBadge from './OrderStatusBadge';
+import { formatDate } from '../../../utils/dateUtils';
 
 const OrderCard = ({ order }) => {
-  // Función para formatear la fecha
-  const formatDate = (dateString) => {
-    const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
-  };
-
   return (
     <Link 
       to={`/user/orders/${order.id}`}
