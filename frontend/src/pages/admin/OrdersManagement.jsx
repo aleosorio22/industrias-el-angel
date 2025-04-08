@@ -4,6 +4,7 @@ import OrderService from '../../services/OrderService';
 import OrdersList from '../../components/admin/orders/OrdersList';
 import OrdersFilter from '../../components/admin/orders/OrdersFilter';
 import ProductionConsolidated from '../../components/admin/orders/ProductionConsolidated';
+import { formatDate } from '../../utils/dateUtils';  // Agregar esta importación
 
 export default function OrdersManagement() {
   const [orders, setOrders] = useState([]);
@@ -29,9 +30,10 @@ export default function OrdersManagement() {
   // Función para formatear fecha para el input type="date"
   function formatDateForInput(date) {
     const d = new Date(date);
-    let month = '' + (d.getMonth() + 1);
-    let day = '' + d.getDate();
-    const year = d.getFullYear();
+    d.setUTCHours(0, 0, 0, 0);  // Asegurarnos de usar UTC
+    let month = '' + (d.getUTCMonth() + 1);
+    let day = '' + d.getUTCDate();
+    const year = d.getUTCFullYear();
 
     if (month.length < 2) month = '0' + month;
     if (day.length < 2) day = '0' + day;
@@ -66,22 +68,11 @@ export default function OrdersManagement() {
     
     // Filtrar por fecha
     if (dateFilter) {
-      // Extraer componentes de la fecha del filtro
-      const [filterYear, filterMonth, filterDay] = dateFilter.split('-').map(Number);
+      const filterDate = new Date(dateFilter + 'T00:00:00Z');
       
       result = result.filter(order => {
-        // Extraer la fecha del pedido y convertirla a fecha local
         const orderDate = new Date(order.fecha);
-        
-        // Obtener componentes de la fecha del pedido en hora local
-        const orderYear = orderDate.getFullYear();
-        const orderMonth = orderDate.getMonth() + 1; // getMonth() devuelve 0-11
-        const orderDay = orderDate.getDate();
-        
-        // Comparar componentes de fecha directamente
-        return orderYear === filterYear && 
-               orderMonth === filterMonth && 
-               orderDay === filterDay;
+        return orderDate.toISOString().split('T')[0] === filterDate.toISOString().split('T')[0];
       });
     }
     
@@ -93,7 +84,7 @@ export default function OrdersManagement() {
     setFilteredOrders(result);
   };
 
-  // Formatear fecha para mostrar
+  // Eliminar la función formatDate local ya que usaremos la importada
   const formatDate = (dateString) => {
     const options = { day: 'numeric', month: 'short', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('es-ES', options);
