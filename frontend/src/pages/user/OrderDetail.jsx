@@ -4,7 +4,9 @@ import { FiArrowLeft, FiPackage, FiAlertCircle, FiRefreshCw, FiCalendar, FiMapPi
 import OrderService from "../../services/OrderService";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import OrderStatusBadge from "../../components/user/orders/OrderStatusBadge";
+import { formatDate } from '../../utils/dateUtils';  // Fixed import path
 
+// Remove the local formatDate function since we're importing it
 export default function OrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
