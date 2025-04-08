@@ -14,6 +14,7 @@ const conversionRoutes = require('./modules/sistema/routes/conversionRoutes');
 const clientRoutes = require('./modules/sistema/routes/clientRoutes');
 const branchRoutes = require ('./modules/sistema/routes/branchRoutes')
 const orderRoutes = require('./modules/sistema/routes/orderRoutes')
+const productionAreaRoutes = require('./modules/sistema/routes/productionAreaRoutes')
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/api/conversions', conversionRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/branches', branchRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/areas-produccion', productionAreaRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {
