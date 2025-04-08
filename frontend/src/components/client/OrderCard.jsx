@@ -1,7 +1,9 @@
 import { FiCalendar, FiUser, FiInfo, FiClock } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { formatDate } from '../../utils/dateUtils';
 
-export default function OrderCard({ order, formatDate, getStatusColor }) {
+// Modificar props para eliminar formatDate
+export default function OrderCard({ order, getStatusColor }) {
   const navigate = useNavigate();
 
   if (!order) return null;
