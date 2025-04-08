@@ -38,9 +38,16 @@ const productionAreaService = {
         `${API_BASE_URL}/areas-produccion/${id}`,
         getAuthHeaders()
       );
-      return response.data;
+      return {
+        success: true,
+        data: response.data.data
+      };
     } catch (error) {
-      throw error.response ? error.response.data : error;
+      console.error("Error fetching production area:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Error al obtener el área de producción"
+      };
     }
   },
 
@@ -92,6 +99,18 @@ const productionAreaService = {
       return response.data;
     } catch (error) {
       throw error.response ? error.response.data : error;
+    }
+  },
+  getAssignedCategories: async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/areas-produccion/categorias-asignadas`,
+        getAuthHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener categorías asignadas:", error);
+      throw error;
     }
   }
 };

@@ -7,6 +7,7 @@ const { authMiddleware, isAdmin } = require('../../../core/middlewares/authMiddl
 router.use(authMiddleware);
 
 // Routes for authenticated users
+router.get('/categorias-asignadas', authMiddleware, productionAreaController.getAssignedCategories);
 router.get('/', productionAreaController.getAllAreas);
 router.get('/:id', productionAreaController.getAreaById);
 
