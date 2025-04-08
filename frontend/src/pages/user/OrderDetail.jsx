@@ -4,9 +4,8 @@ import { FiArrowLeft, FiPackage, FiAlertCircle, FiRefreshCw, FiCalendar, FiMapPi
 import OrderService from "../../services/OrderService";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import OrderStatusBadge from "../../components/user/orders/OrderStatusBadge";
-import { formatDate } from '../../utils/dateUtils';  // Fixed import path
+import { formatDate } from '../../utils/dateUtils';
 
-// Remove the local formatDate function since we're importing it
 export default function OrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,11 +37,7 @@ export default function OrderDetail() {
     }
   };
 
-  // Función para formatear la fecha
-  const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
-  };
+  // Eliminamos la función formatDate local ya que estamos usando la importada
 
   return (
     <div className="min-h-screen bg-gray-100 pb-20">
