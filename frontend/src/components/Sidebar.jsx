@@ -17,7 +17,8 @@ import {
   FiChevronLeft,
   FiTag,
   FiHash,
-  FiBox
+  FiBox, 
+  FiLayers
 } from "react-icons/fi"
 
 // Creamos un contexto para compartir el estado del sidebar
@@ -76,6 +77,7 @@ export default function Sidebar() {
     { name: "Configuración", icon: FiSettings, path: "/admin/settings" },
     { name: "Ayuda", icon: FiHelpCircle, path: "/admin/help" },
     { name: "Clientes", icon: FiUsers, path: "/admin/clients" },
+    { name: "Áreas de Producción", icon: FiLayers, path: "/admin/production-areas" },
   ]
 
   const isActive = (path) => {

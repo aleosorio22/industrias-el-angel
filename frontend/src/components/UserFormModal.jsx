@@ -140,6 +140,7 @@ export default function UserFormModal({
                       <option value="usuario">Usuario</option>
                       <option value="vendedor">Vendedor</option>
                       <option value="admin">Administrador</option>
+                      <option value="produccion">Produccion</option>
                     </select>
                   </div>
 
