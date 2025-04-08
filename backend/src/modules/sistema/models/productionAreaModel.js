@@ -51,18 +51,58 @@ class ProductionAreaModel {
         return result.affectedRows > 0;
     }
 
+    static async checkCategoriesAssignment(categoryIds, excludeAreaId = null) {
+        const assignments = [];
+        
+        for (const categoryId of categoryIds) {
+            const query = excludeAreaId 
+                ? `SELECT ap.id, ap.nombre, c.id as categoria_id, c.nombre as categoria_nombre
+                   FROM areas_produccion ap
+                   JOIN area_categoria ac ON ap.id = ac.area_id
+                   JOIN categorias c ON c.id = ac.categoria_id
+                   WHERE c.id = ? AND ap.id != ? AND ap.estado = "activo"`
+                : `SELECT ap.id, ap.nombre, c.id as categoria_id, c.nombre as categoria_nombre
+                   FROM areas_produccion ap
+                   JOIN area_categoria ac ON ap.id = ac.area_id
+                   JOIN categorias c ON c.id = ac.categoria_id
+                   WHERE c.id = ? AND ap.estado = "activo"`;
+
+            const params = excludeAreaId ? [categoryId, excludeAreaId] : [categoryId];
+            const [results] = await db.execute(query, params);
+            
+            if (results.length > 0) {
+                assignments.push({
+                    categoryId,
+                    categoryName: results[0].categoria_nombre,
+                    areaId: results[0].id,
+                    areaName: results[0].nombre
+                });
+            }
+        }
+        
+        return assignments;
+    }
+
     static async assignCategories(areaId, categoryIds) {
         const connection = await db.getConnection();
         await connection.beginTransaction();
 
         try {
-            // Delete existing assignments
+            // Verificar asignaciones existentes
+            const existingAssignments = await this.checkCategoriesAssignment(categoryIds, areaId);
+            if (existingAssignments.length > 0) {
+                const details = existingAssignments.map(a => 
+                    `La categoría "${a.categoryName}" ya está asignada al área "${a.areaName}"`
+                ).join(', ');
+                throw new Error(`No se pueden asignar categorías duplicadas: ${details}`);
+            }
+
+            // Continuar con la asignación si no hay duplicados
             await connection.execute(
                 'DELETE FROM area_categoria WHERE area_id = ?',
                 [areaId]
             );
 
-            // Insert new assignments
             for (const categoryId of categoryIds) {
                 await connection.execute(
                     'INSERT INTO area_categoria (area_id, categoria_id) VALUES (?, ?)',
@@ -89,6 +129,16 @@ class ProductionAreaModel {
             [areaId]
         );
         return categories;
+    }
+
+    static async getAssignedCategories() {
+        const [results] = await db.execute(`
+            SELECT ac.categoria_id, ap.nombre as area_nombre
+            FROM area_categoria ac
+            JOIN areas_produccion ap ON ap.id = ac.area_id
+            WHERE ap.estado = "activo"
+        `);
+        return results;
     }
 }
 
