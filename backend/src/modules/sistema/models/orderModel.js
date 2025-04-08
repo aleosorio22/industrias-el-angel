@@ -90,14 +90,23 @@ class OrderModel {
      */
     static async findAll(userId, isAdmin) {
         let query = `
-            SELECT p.*, 
-                   c.nombre as cliente_nombre, 
-                   s.nombre as sucursal_nombre,
-                   (SELECT COUNT(*) FROM pedido_detalle WHERE pedido_id = p.id) as total_productos
+            SELECT 
+                p.id,
+                p.cliente_id,
+                p.sucursal_id,
+                p.usuario_id,
+                DATE_FORMAT(p.fecha, '%Y-%m-%d') as fecha,
+                p.estado,
+                p.observaciones,
+                p.created_at,
+                p.updated_at,
+                c.nombre as cliente_nombre, 
+                s.nombre as sucursal_nombre,
+                (SELECT COUNT(*) FROM pedido_detalle WHERE pedido_id = p.id) as total_productos
             FROM pedidos p
             LEFT JOIN clientes c ON p.cliente_id = c.id
             LEFT JOIN sucursales s ON p.sucursal_id = s.id
-        `;
+        `;;
         
         // Si no es admin, solo mostrar pedidos del usuario
         if (!isAdmin) {
