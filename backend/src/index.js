@@ -15,6 +15,8 @@ const clientRoutes = require('./modules/sistema/routes/clientRoutes');
 const branchRoutes = require ('./modules/sistema/routes/branchRoutes')
 const orderRoutes = require('./modules/sistema/routes/orderRoutes')
 const productionAreaRoutes = require('./modules/sistema/routes/productionAreaRoutes')
+const userProductionAreaRoutes = require('./modules/sistema/routes/userProductionAreaRoutes');
+const productionAuthRoutes = require('./modules/sistema/routes/productionAuthRoutes');
 
 const app = express();
 
@@ -36,6 +38,8 @@ app.use('/api/clients', clientRoutes);
 app.use('/api/branches', branchRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/areas-produccion', productionAreaRoutes);
+app.use('/api/user-production-areas', userProductionAreaRoutes);
+app.use('/api/production/auth', productionAuthRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {
