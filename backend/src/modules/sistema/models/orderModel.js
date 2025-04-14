@@ -230,6 +230,8 @@ class OrderModel {
             WITH pedidos_del_dia AS (
                 SELECT pd.producto_id,
                        p.nombre AS producto_nombre,
+                       p.categoria_id,
+                       cat.nombre AS categoria_nombre,
                        p.unidad_base_id,
                        pd.presentacion_id,
                        pd.cantidad,
@@ -237,66 +239,105 @@ class OrderModel {
                 FROM pedidos pe
                 JOIN pedido_detalle pd ON pe.id = pd.pedido_id
                 JOIN productos p ON pd.producto_id = p.id
-                JOIN producto_presentacion pp ON (pd.producto_id = pp.producto_id AND pd.presentacion_id = pp.presentacion_id)
+                JOIN categorias cat ON p.categoria_id = cat.id
+                JOIN producto_presentacion pp ON pd.producto_id = pp.producto_id AND pd.presentacion_id = pp.presentacion_id
                 WHERE DATE(pe.fecha) = ?
                 AND pe.estado != 'cancelado'
             ),
+    
             total_unidades AS (
                 SELECT 
+                    categoria_id,
+                    categoria_nombre,
                     producto_id,
                     producto_nombre,
                     unidad_base_id,
-                    SUM(cantidad * unidades_por_presentacion) as total_unidades
+                    SUM(cantidad * unidades_por_presentacion) AS total_unidades
                 FROM pedidos_del_dia
-                GROUP BY producto_id, producto_nombre, unidad_base_id
+                GROUP BY categoria_id, categoria_nombre, producto_id, producto_nombre, unidad_base_id
             ),
+    
             conversiones AS (
                 SELECT 
                     cu.producto_id,
-                    u1.nombre AS unidad_origen,
-                    u2.nombre AS unidad_destino,
+                    LOWER(u1.nombre) AS unidad_origen,
+                    LOWER(u2.nombre) AS unidad_destino,
                     cu.factor_conversion
                 FROM conversion_unidades cu
                 JOIN unidades u1 ON cu.unidad_origen_id = u1.id
                 JOIN unidades u2 ON cu.unidad_destino_id = u2.id
+            ),
+    
+            productos_consolidados AS (
+                SELECT 
+                    t.categoria_id,
+                    t.categoria_nombre,
+                    t.producto_id,
+                    t.producto_nombre,
+                    t.total_unidades,
+                    ROUND(t.total_unidades / MAX(CASE 
+                        WHEN c.unidad_origen = 'lata' AND c.unidad_destino = 'unidad' 
+                        THEN c.factor_conversion END), 2) AS latas_necesarias,
+    
+                    ROUND((t.total_unidades / MAX(CASE 
+                        WHEN c.unidad_origen = 'lata' AND c.unidad_destino = 'unidad' 
+                        THEN c.factor_conversion END))
+                        / MAX(CASE 
+                            WHEN c.unidad_origen = 'arroba' AND c.unidad_destino = 'lata' 
+                            THEN c.factor_conversion END) * 25, 2) AS libras_necesarias,
+    
+                    ROUND((t.total_unidades / MAX(CASE 
+                        WHEN c.unidad_origen = 'lata' AND c.unidad_destino = 'unidad' 
+                        THEN c.factor_conversion END))
+                        / MAX(CASE 
+                            WHEN c.unidad_origen = 'arroba' AND c.unidad_destino = 'lata' 
+                            THEN c.factor_conversion END), 2) AS arrobas_necesarias
+    
+                FROM total_unidades t
+                LEFT JOIN conversiones c ON t.producto_id = c.producto_id
+                GROUP BY t.categoria_id, t.categoria_nombre, t.producto_id, t.producto_nombre, t.total_unidades
+            ),
+    
+            totales_por_categoria AS (
+                SELECT 
+                    categoria_id,
+                    categoria_nombre,
+                    CONCAT('Total categoría: ', categoria_nombre) AS producto_nombre,
+                    SUM(latas_necesarias) AS latas_necesarias,
+                    SUM(libras_necesarias) AS libras_necesarias,
+                    SUM(arrobas_necesarias) AS arrobas_necesarias
+                FROM productos_consolidados
+                GROUP BY categoria_id, categoria_nombre
             )
-            SELECT 
-                t.producto_nombre,
-                t.total_unidades AS unidades_totales,
-                u.nombre AS unidad_base,
-                ROUND(t.total_unidades / MAX(CASE 
-                    WHEN c.unidad_origen = 'Lata' AND c.unidad_destino = 'Unidad'
-                    THEN c.factor_conversion 
-                END), 2) AS latas_necesarias,
-                ROUND(
-                    (t.total_unidades / MAX(CASE 
-                        WHEN c.unidad_origen = 'Lata' AND c.unidad_destino = 'Unidad'
-                        THEN c.factor_conversion 
-                    END))
-                    / MAX(CASE 
-                        WHEN c.unidad_origen = 'Arroba' AND c.unidad_destino = 'Lata'
-                        THEN c.factor_conversion 
-                    END) * 25, 2
-                ) AS libras_necesarias,
-                ROUND(
-                    (t.total_unidades / MAX(CASE 
-                        WHEN c.unidad_origen = 'Lata' AND c.unidad_destino = 'Unidad'
-                        THEN c.factor_conversion 
-                    END))
-                    / MAX(CASE 
-                        WHEN c.unidad_origen = 'Arroba' AND c.unidad_destino = 'Lata'
-                        THEN c.factor_conversion 
-                    END), 2
-                ) AS arrobas_necesarias
-            FROM total_unidades t
-            JOIN unidades u ON t.unidad_base_id = u.id
-            LEFT JOIN conversiones c ON t.producto_id = c.producto_id
-            GROUP BY t.producto_nombre, t.total_unidades, u.nombre
-            ORDER BY t.producto_nombre`;
-
+    
+            SELECT * FROM (
+                SELECT 
+                    categoria_nombre,
+                    producto_nombre,
+                    total_unidades,
+                    latas_necesarias,
+                    libras_necesarias,
+                    arrobas_necesarias
+                FROM productos_consolidados
+    
+                UNION ALL
+    
+                SELECT 
+                    categoria_nombre,
+                    producto_nombre,
+                    NULL AS total_unidades,
+                    latas_necesarias,
+                    libras_necesarias,
+                    arrobas_necesarias
+                FROM totales_por_categoria
+            ) AS resultado
+            ORDER BY categoria_nombre, producto_nombre
+        `;
+    
         const [results] = await db.execute(query, [date]);
         return results;
     }
+    
 }
 
 module.exports = OrderModel;
