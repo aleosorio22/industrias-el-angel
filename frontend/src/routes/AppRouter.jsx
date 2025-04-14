@@ -22,6 +22,7 @@ import OrdersManagement from "../pages/admin/OrdersManagement"; // Importar el n
 import AdminOrderDetail from "../pages/admin/OrderDetail"; // Importar el nuevo componente
 import ProductionAreasManagement from "../pages/admin/ProductionAreasManagement";
 import ProductionAreaDetails from "../pages/admin/ProductionAreaDetails"; // Agregar esta importación
+import ProductionConsolidated from "../pages/admin/ProductionConsolidated";
 
 //pages de usuarios
 import UserDashboard from "../pages/user/UserDashboard";
@@ -65,8 +66,9 @@ function AppRouter() {
             <Route path="/admin/products/:id/details" element={<ProductDetails />} />
             <Route path="/admin/clients" element={<ClientsManagement />} />
             <Route path="/admin/clients/:id/details" element={<ClientDetails />} />
-            <Route path="/admin/orders" element={<OrdersManagement />} /> {/* Agregar la ruta */}
+            <Route path="/admin/orders" element={<OrdersManagement />} />
             <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
+            <Route path="/admin/production/consolidated" element={<ProductionConsolidated />} />
             <Route path="/admin/production-areas" element={<ProductionAreasManagement />} />
             <Route path="/admin/production-areas/:id/details" element={<ProductionAreaDetails />} />
             <Route path="*" element={<NotFound />} />
