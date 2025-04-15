@@ -18,8 +18,26 @@ export default function UserTemplates() {
     try {
       setIsLoading(true);
       const data = await templateService.getTemplates();
+      
+      // Verificar la respuesta
+      if (!data) {
+        console.error("No se recibieron datos de plantillas");
+        toast.error("No se pudieron cargar las plantillas");
+        setTemplates([]);
+        return;
+      }
+      
       // Asegurarse de que data sea un array
-      setTemplates(Array.isArray(data) ? data : []);
+      if (Array.isArray(data)) {
+        setTemplates(data);
+      } else if (data.success && Array.isArray(data.data)) {
+        // Si la respuesta tiene formato {success: true, data: [...]}
+        setTemplates(data.data);
+      } else {
+        console.error("Formato de datos incorrecto:", data);
+        toast.error("Formato de datos incorrecto");
+        setTemplates([]);
+      }
     } catch (error) {
       console.error("Error al cargar plantillas:", error);
       toast.error("No se pudieron cargar las plantillas");
@@ -57,11 +75,21 @@ export default function UserTemplates() {
             <p className="text-gray-500">Gestiona tus plantillas de pedidos</p>
           </div>
           <div className="flex space-x-2">
-            <Link to="/user/profile" className="px-4 py-2 flex items-center text-gray-600 bg-white rounded-md shadow hover:bg-gray-50">
+            <Link 
+              to="/user/profile" 
+              className="px-4 py-2 flex items-center text-gray-600 bg-white rounded-md shadow hover:bg-gray-50"
+              role="button"
+              aria-label="Volver"
+            >
               <FiArrowLeft className="mr-2" />
               Volver
             </Link>
-            <Link to="/user/templates/new" className="px-4 py-2 flex items-center text-white bg-green-500 rounded-md shadow hover:bg-green-600">
+            <Link 
+              to="/user/templates/new" 
+              className="px-4 py-2 flex items-center text-white bg-green-500 rounded-md shadow hover:bg-green-600"
+              role="button"
+              aria-label="Nueva Plantilla"
+            >
               <FiPlus className="mr-2" />
               Nueva Plantilla
             </Link>
@@ -76,7 +104,12 @@ export default function UserTemplates() {
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <h2 className="text-xl font-semibold mb-2">No tienes plantillas guardadas</h2>
             <p className="text-gray-500 mb-6">Crea tu primera plantilla para agilizar tus pedidos frecuentes</p>
-            <Link to="/user/templates/new" className="px-4 py-2 text-white bg-green-500 rounded-md shadow hover:bg-green-600">
+            <Link 
+              to="/user/templates/new" 
+              className="px-4 py-2 text-white bg-green-500 rounded-md shadow hover:bg-green-600 inline-block"
+              role="button"
+              aria-label="Crear plantilla"
+            >
               Crear plantilla
             </Link>
           </div>
@@ -113,27 +146,32 @@ export default function UserTemplates() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-2">
+                        <div className="flex justify-end space-x-3">
                           <Link 
                             to={`/user/orders/new?template=${template.id}`}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-blue-600 hover:text-blue-900 p-2"
                             title="Usar plantilla"
+                            role="button"
+                            aria-label="Usar plantilla"
                           >
-                            <FiCopy size={18} />
+                            <FiCopy size={20} />
                           </Link>
                           <Link 
                             to={`/user/templates/${template.id}/edit`}
-                            className="text-green-600 hover:text-green-900"
+                            className="text-green-600 hover:text-green-900 p-2"
                             title="Editar plantilla"
+                            role="button"
+                            aria-label="Editar plantilla"
                           >
-                            <FiEdit2 size={18} />
+                            <FiEdit2 size={20} />
                           </Link>
                           <button
                             onClick={() => handleDeleteClick(template)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-red-600 hover:text-red-900 p-2"
                             title="Eliminar plantilla"
+                            aria-label="Eliminar plantilla"
                           >
-                            <FiTrash2 size={18} />
+                            <FiTrash2 size={20} />
                           </button>
                         </div>
                       </td>
