@@ -261,6 +261,34 @@ class OrderController {
             });
         }
     }
+
+    static async updateProductionQuantity(req, res) {
+        try {
+          const { date } = req.params;
+          const { producto_id, total_unidades } = req.body;
+      
+          if (!producto_id || total_unidades === undefined) {
+            return res.status(400).json({
+              success: false,
+              message: 'Se requiere producto_id y total_unidades'
+            });
+          }
+      
+          const updatedItem = await OrderModel.updateProductionQuantity(date, producto_id, total_unidades);
+      
+          res.json({
+            success: true,
+            message: 'Cantidad actualizada correctamente',
+            data: updatedItem
+          });
+        } catch (error) {
+          console.error('Error al actualizar cantidad:', error);
+          res.status(500).json({
+            success: false,
+            message: error.message || 'Error al actualizar la cantidad'
+          });
+        }
+      }
 }
 
 module.exports = OrderController;
