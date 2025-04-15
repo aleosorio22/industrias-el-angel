@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../../context/AuthContext"
-import { FiUser, FiMail, FiPhone, FiLock, FiLogOut } from "react-icons/fi"
+import { FiUser, FiMail, FiPhone, FiLock, FiLogOut, FiList } from "react-icons/fi" // Agregamos FiList
 import { toast } from "react-hot-toast"
 import UnderConstruction from "../../components/user/UnderConstruction"
 import clientService from "../../services/ClientService"
+import { Link } from "react-router-dom" // Importamos Link
 
 export default function UserProfile() {
   const { auth, logout } = useAuth()
@@ -87,6 +88,14 @@ export default function UserProfile() {
         )}
         
         <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
+          <Link 
+            to="/user/templates"
+            className="w-full px-4 py-3 flex items-center text-left hover:bg-gray-50 transition-colors"
+          >
+            <FiList className="text-gray-400 mr-3" size={18} />
+            <span>Gestionar mis plantillas</span>
+          </Link>
+          
           <button 
             onClick={() => setIsPasswordModalOpen(true)}
             className="w-full px-4 py-3 flex items-center text-left hover:bg-gray-50 transition-colors"

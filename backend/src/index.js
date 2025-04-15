@@ -17,6 +17,7 @@ const orderRoutes = require('./modules/sistema/routes/orderRoutes')
 const productionAreaRoutes = require('./modules/sistema/routes/productionAreaRoutes')
 const userProductionAreaRoutes = require('./modules/sistema/routes/userProductionAreaRoutes');
 const productionAuthRoutes = require('./modules/sistema/routes/productionAuthRoutes');
+const templateRoutes = require('./modules/sistema/routes/templateRoutes'); // Nueva línea
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/areas-produccion', productionAreaRoutes);
 app.use('/api/user-production-areas', userProductionAreaRoutes);
 app.use('/api/production/auth', productionAuthRoutes);
+app.use('/api/plantillas', templateRoutes); // Nueva línea
 
 // Manejo de errores
 app.use((err, req, res, next) => {
