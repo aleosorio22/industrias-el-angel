@@ -313,6 +313,7 @@ class OrderModel {
             SELECT * FROM (
                 SELECT 
                     categoria_nombre,
+                    producto_id,
                     producto_nombre,
                     total_unidades,
                     latas_necesarias,
@@ -324,6 +325,7 @@ class OrderModel {
     
                 SELECT 
                     categoria_nombre,
+                    NULL AS producto_id,
                     producto_nombre,
                     NULL AS total_unidades,
                     latas_necesarias,
@@ -337,6 +339,66 @@ class OrderModel {
         const [results] = await db.execute(query, [date]);
         return results;
     }
+    static async updateProductionQuantity(date, producto_id, total_unidades) {
+        const connection = await db.getConnection();
+        try {
+            // Obtener información del producto con la misma estructura del consolidado
+            const [productInfo] = await connection.execute(`
+                WITH conversiones AS (
+                    SELECT 
+                        cu.producto_id,
+                        LOWER(u1.nombre) AS unidad_origen,
+                        LOWER(u2.nombre) AS unidad_destino,
+                        cu.factor_conversion
+                    FROM conversion_unidades cu
+                    JOIN unidades u1 ON cu.unidad_origen_id = u1.id
+                    JOIN unidades u2 ON cu.unidad_destino_id = u2.id
+                )
+                SELECT 
+                    p.id,
+                    p.nombre as producto_nombre,
+                    cat.nombre as categoria_nombre,
+                    ROUND(${total_unidades} / MAX(CASE 
+                        WHEN c.unidad_origen = 'lata' AND c.unidad_destino = 'unidad' 
+                        THEN c.factor_conversion END), 2) AS latas_necesarias,
+                    ROUND((${total_unidades} / MAX(CASE 
+                        WHEN c.unidad_origen = 'lata' AND c.unidad_destino = 'unidad' 
+                        THEN c.factor_conversion END))
+                        / MAX(CASE 
+                            WHEN c.unidad_origen = 'arroba' AND c.unidad_destino = 'lata' 
+                            THEN c.factor_conversion END), 2) AS arrobas_necesarias,
+                    ROUND((${total_unidades} / MAX(CASE 
+                        WHEN c.unidad_origen = 'lata' AND c.unidad_destino = 'unidad' 
+                        THEN c.factor_conversion END))
+                        / MAX(CASE 
+                            WHEN c.unidad_origen = 'arroba' AND c.unidad_destino = 'lata' 
+                            THEN c.factor_conversion END) * 25, 2) AS libras_necesarias
+            FROM productos p
+            JOIN categorias cat ON p.categoria_id = cat.id
+            LEFT JOIN conversiones c ON p.id = c.producto_id
+            WHERE p.id = ?
+            GROUP BY p.id, p.nombre, cat.nombre
+        `, [producto_id]);
+    
+        if (!productInfo.length) {
+            throw new Error('Producto no encontrado');
+        }
+    
+        const info = productInfo[0];
+    
+        return {
+            producto_id,
+            producto_nombre: info.producto_nombre,
+            categoria_nombre: info.categoria_nombre,
+            total_unidades: Number(total_unidades),
+            latas_necesarias: Number(info.latas_necesarias),
+            arrobas_necesarias: Number(info.arrobas_necesarias),
+            libras_necesarias: Number(info.libras_necesarias)
+        };
+    } finally {
+        connection.release();
+    }
+}
     
 }
 

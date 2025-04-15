@@ -1,39 +1,39 @@
-import React from 'react';
-import { FiDownload, FiArrowLeft } from 'react-icons/fi';
-import { useNavigate, useLocation } from 'react-router-dom';
-import jsPDF from 'jspdf';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import OrderService from '../../services/OrderService';
+import { formatDateForInput } from '../../utils/dateUtils';
+import usePDFGenerator from '../../hooks/usePDFGenerator';
+import { toast } from 'react-toastify';
+
+// Componentes
+import Header from './components/production/Header';
+import CategoryTable from './components/production/CategoryTable';
+import LoadingSpinner from './components/production/LoadingSpinner';
 
 const ProductionConsolidated = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const [generatingPDF, setGeneratingPDF] = React.useState(false);
-  const [data, setData] = React.useState(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-  const [dateFilter, setDateFilter] = React.useState(
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [dateFilter, setDateFilter] = useState(
     location.state?.selectedDate || formatDateForInput(new Date())
   );
-
-  function formatDateForInput(date) {
-    const d = new Date(date);
-    d.setUTCHours(0, 0, 0, 0);
-    let month = '' + (d.getUTCMonth() + 1);
-    let day = '' + d.getUTCDate();
-    const year = d.getUTCFullYear();
-
-    if (month.length < 2) month = '0' + month;
-    if (day.length < 2) day = '0' + day;
-
-    return [year, month, day].join('-');
-  }
+  const [updatingProduct, setUpdatingProduct] = useState(false);
 
   const fetchConsolidated = async () => {
     try {
       setIsLoading(true);
       const response = await OrderService.getProductionConsolidated(dateFilter);
       if (response.success) {
-        setData(response.data);
+        // Asegurarnos de que cada item tenga un producto_id
+        const processedData = response.data.map(item => {
+          // Si es un total, no tendrá producto_id
+          if (item.producto_nombre.startsWith('Total')) {
+            return item;
+          }
+          return item;
+        });
+        setData(processedData);
       } else {
         throw new Error(response.message);
       }
@@ -44,11 +44,11 @@ const ProductionConsolidated = () => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchConsolidated();
   }, [dateFilter]);
 
-  const groupedData = React.useMemo(() => {
+  const groupedData = useMemo(() => {
     if (!data) return {};
     return data.reduce((acc, item) => {
       if (!acc[item.categoria_nombre]) {
@@ -59,227 +59,137 @@ const ProductionConsolidated = () => {
     }, {});
   }, [data]);
 
-  const handleGeneratePDF = async () => {
+  const { generatePDF, generatingPDF } = usePDFGenerator(groupedData, dateFilter);
+
+  const handleUpdateQuantity = async (producto_id, total_unidades) => {
     try {
-      setGeneratingPDF(true);
+      setUpdatingProduct(true);
       
-      // Crear nuevo documento PDF
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const margin = 20;
-      let yPosition = 20;
-
-      // Configurar fuentes
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(16);
+      // Verificar que tenemos los datos necesarios
+      if (!producto_id) {
+        console.error('Error: producto_id es undefined');
+        toast.error('Error: ID de producto no válido');
+        return;
+      }
       
-      // Título
-      pdf.text("Consolidado de Producción", margin, yPosition);
-      pdf.setFontSize(12);
-      pdf.text(`Fecha: ${dateFilter}`, margin, yPosition + 10);
-      yPosition += 25;
-
-      // Por cada categoría
-      Object.entries(groupedData).forEach(([categoria, items]) => {
-        // Verificar si necesitamos nueva página
-        if (yPosition > 250) {
-          pdf.addPage();
-          yPosition = 20;
-        }
-
-        // Título de categoría
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(14);
-        pdf.text(categoria, margin, yPosition);
-        yPosition += 10;
-
-        // Configurar columnas
-        const columns = [
-          "Producto",
-          "Unidades",
-          "Arrobas",
-          "Latas",
-          "Libras"
-        ];
-        
-        const columnWidths = {
-          Producto: 60,
-          Unidades: 25,
-          Arrobas: 25,
-          Latas: 25,
-          Libras: 25
-        };
-
-        // Encabezados de tabla
-        pdf.setFontSize(10);
-        let xPosition = margin;
-        columns.forEach((column) => {
-          pdf.text(column, xPosition, yPosition);
-          xPosition += columnWidths[column];
-        });
-        yPosition += 5;
-
-        // Línea separadora
-        pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 5;
-
-        // Datos
-        pdf.setFont("helvetica", "normal");
-        items.forEach((item) => {
-          // Verificar si necesitamos nueva página
-          if (yPosition > 270) {
-            pdf.addPage();
-            yPosition = 20;
-            
-            // Repetir encabezados en nueva página
-            pdf.setFont("helvetica", "bold");
-            xPosition = margin;
-            columns.forEach((column) => {
-              pdf.text(column, xPosition, yPosition);
-              xPosition += columnWidths[column];
-            });
-            yPosition += 5;
-            pdf.line(margin, yPosition, pageWidth - margin, yPosition);
-            yPosition += 5;
-            pdf.setFont("helvetica", "normal");
-          }
-
-          xPosition = margin;
-          
-          // Producto
-          pdf.text(item.producto_nombre, xPosition, yPosition);
-          xPosition += columnWidths.Producto;
-
-          // Valores numéricos alineados a la derecha
-          const values = [
-            item.total_unidades?.toLocaleString() || '-',
-            item.arrobas_necesarias?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '-',
-            item.latas_necesarias?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '-',
-            item.libras_necesarias?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '-'
-          ];
-
-          values.forEach((value, index) => {
-            const textWidth = pdf.getStringUnitWidth(value) * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
-            const columnWidth = columnWidths[columns[index + 1]];
-            const textX = xPosition + columnWidth - textWidth - 2;
-            pdf.text(value, textX, yPosition);
-            xPosition += columnWidth;
-          });
-
-          yPosition += 6;
-        });
-
-        yPosition += 10;
+      console.log('Actualizando producto:', { producto_id, total_unidades });
+      
+      const response = await OrderService.updateProductionQuantity(dateFilter, {
+        producto_id,
+        total_unidades
       });
-
-      pdf.save(`Consolidado_Produccion_${dateFilter}.pdf`);
-    } catch (error) {
-      console.error('Error generando PDF:', error);
+      
+      console.log('Respuesta del servidor:', response);
+      
+      if (response.success) {
+        // Actualizar el estado con los nuevos datos
+        setData(prevData => {
+          // Encontrar la categoría del producto actualizado
+          const categoriaDelProducto = prevData.find(item => 
+            item.producto_id === producto_id
+          )?.categoria_nombre;
+          
+          // Actualizar los datos
+          const updatedData = prevData.map(item => {
+            // Actualizar el producto específico
+            if (item.producto_id === producto_id) {
+              return {
+                ...item,
+                total_unidades: Number(response.data.total_unidades),
+                arrobas_necesarias: Number(response.data.arrobas_necesarias),
+                latas_necesarias: Number(response.data.latas_necesarias),
+                libras_necesarias: Number(response.data.libras_necesarias)
+              };
+            }
+            
+            // Actualizar el total de la categoría
+            if (item.producto_nombre === `Total categoría: ${categoriaDelProducto}`) {
+              // Calcular nuevos totales para la categoría
+              const productosDeCategoria = prevData.filter(prod => 
+                prod.categoria_nombre === categoriaDelProducto && 
+                !prod.producto_nombre.startsWith('Total')
+              );
+              
+              // Actualizar el producto en los cálculos
+              const productosActualizados = productosDeCategoria.map(prod => 
+                prod.producto_id === producto_id 
+                  ? {
+                      ...prod,
+                      arrobas_necesarias: Number(response.data.arrobas_necesarias),
+                      latas_necesarias: Number(response.data.latas_necesarias),
+                      libras_necesarias: Number(response.data.libras_necesarias)
+                    }
+                  : prod
+              );
+              
+              // Calcular nuevos totales asegurando que sean números
+              const nuevasArrobas = productosActualizados.reduce(
+                (sum, prod) => sum + (Number(prod.arrobas_necesarias) || 0), 0
+              );
+              const nuevasLatas = productosActualizados.reduce(
+                (sum, prod) => sum + (Number(prod.latas_necesarias) || 0), 0
+              );
+              const nuevasLibras = productosActualizados.reduce(
+                (sum, prod) => sum + (Number(prod.libras_necesarias) || 0), 0
+              );
+              
+              console.log('Nuevos totales calculados:', {
+                categoria: categoriaDelProducto,
+                arrobas: nuevasArrobas,
+                latas: nuevasLatas,
+                libras: nuevasLibras
+              });
+              
+              return {
+                ...item,
+                arrobas_necesarias: nuevasArrobas,
+                latas_necesarias: nuevasLatas,
+                libras_necesarias: nuevasLibras
+              };
+            }
+            
+            return item;
+          });
+          
+          return updatedData;
+        });
+        
+        toast.success('Cantidad actualizada correctamente');
+      } else {
+        toast.error(response.message || 'Error al actualizar la cantidad');
+      }
+    } catch (err) {
+      console.error('Error completo:', err);
+      toast.error('Error al actualizar la cantidad');
     } finally {
-      setGeneratingPDF(false);
+      setUpdatingProduct(false);
     }
   };
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/admin/orders')}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <FiArrowLeft className="text-xl" />
-          </button>
-          <h1 className="text-2xl font-bold text-gray-800">Consolidado de Producción</h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <input
-            type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="px-3 py-2 border rounded-lg"
-          />
-          <button
-            onClick={handleGeneratePDF}
-            disabled={generatingPDF || isLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50"
-          >
-            {generatingPDF ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"/>
-            ) : (
-              <>
-                <FiDownload size={16} />
-                <span>Descargar PDF</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
+      <Header 
+        dateFilter={dateFilter}
+        setDateFilter={setDateFilter}
+        handleGeneratePDF={generatePDF}
+        generatingPDF={generatingPDF}
+        isLoading={isLoading || updatingProduct}
+      />
 
       {isLoading ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-        </div>
+        <LoadingSpinner />
       ) : error ? (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg text-center">{error}</div>
       ) : (
         <div className="bg-white rounded-lg shadow-md p-6">
-          {/* Eliminamos el ref={contentRef} ya que no lo necesitamos */}
           <div className="space-y-6">
             {Object.entries(groupedData).map(([categoria, items]) => (
-              <div key={categoria} className="bg-white rounded-lg border border-gray-200">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-800">{categoria}</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Producto
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Unidades
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Arrobas
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Latas
-                        </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Libras
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {items.map((item, index) => (
-                        <tr 
-                          key={index}
-                          className={item.producto_nombre.startsWith('Total') ? 
-                            'bg-gray-50 font-semibold' : 'hover:bg-gray-50'}
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {item.producto_nombre}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right">
-                            {item.total_unidades?.toLocaleString() || '-'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right">
-                            {item.arrobas_necesarias?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right">
-                            {item.latas_necesarias?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right">
-                            {item.libras_necesarias?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              <CategoryTable 
+                key={categoria} 
+                categoria={categoria} 
+                items={items} 
+                onUpdateQuantity={handleUpdateQuantity}
+              />
             ))}
           </div>
         </div>
