@@ -20,7 +20,8 @@ export default function AddTemplate() {
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [selectedPresentation, setSelectedPresentation] = useState("");
-  const [cantidad, setCantidad] = useState(1);
+  // Cambiar el valor inicial de cantidad de 1 a cadena vacía
+  const [cantidad, setCantidad] = useState("");
   
   useEffect(() => {
     const fetchData = async () => {
@@ -136,7 +137,7 @@ export default function AddTemplate() {
   };
   
   const handleAddProduct = async () => {
-    if (!selectedProduct || !selectedPresentation || cantidad < 1) {
+    if (!selectedProduct || !selectedPresentation || !cantidad) {
       toast.error("Selecciona un producto, presentación y cantidad válida");
       return;
     }
@@ -201,7 +202,7 @@ export default function AddTemplate() {
     // Limpiar selección
     setSelectedProduct("");
     setSelectedPresentation("");
-    setCantidad(1);
+    setCantidad(""); // Cambiar a cadena vacía
     setShowAddProductModal(false);
     
     toast.success("Producto agregado a la plantilla");
@@ -390,7 +391,7 @@ export default function AddTemplate() {
                   type="number"
                   id="cantidad"
                   value={cantidad}
-                  onChange={(e) => setCantidad(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => setCantidad(e.target.value)}
                   min="1"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
