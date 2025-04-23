@@ -5,16 +5,28 @@ class GraphModel {
     const session = driver.session();
     try {
       await session.run(`
-        MERGE (u:Usuario {nombre: $usuario})
-        MERGE (p:Producto {nombre: $producto})
+        MERGE (u:Usuario {id: $usuario_id})
+          ON CREATE SET u.nombre = $usuario_nombre
+          ON MATCH SET u.nombre = $usuario_nombre
+  
+        MERGE (p:Producto {id: $producto_id})
+          ON CREATE SET p.nombre = $producto_nombre
+          ON MATCH SET p.nombre = $producto_nombre
+  
         MERGE (u)-[:HA_PEDIDO]->(p)
-      `, { usuario, producto });
+      `, {
+        usuario_id: usuario.id,
+        usuario_nombre: usuario.nombre,
+        producto_id: producto.id,
+        producto_nombre: producto.nombre,
+      });
     } catch (err) {
       console.error("❌ Error Neo4j:", err);
     } finally {
       await session.close();
     }
   }
+  
 
   static async recomendarProductos(usuario) {
     const session = driver.session();
