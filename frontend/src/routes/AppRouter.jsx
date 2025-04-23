@@ -18,11 +18,14 @@ import ProductsManagement from "../pages/admin/ProductsManagement";
 import ProductDetails from "../pages/admin/ProductDetails";
 import ClientsManagement from "../pages/admin/ClientsManagement";
 import ClientDetails from "../pages/admin/ClientDetails";
-import OrdersManagement from "../pages/admin/OrdersManagement"; // Importar el nuevo componente
-import AdminOrderDetail from "../pages/admin/OrderDetail"; // Importar el nuevo componente
+import OrdersManagement from "../pages/admin/OrdersManagement";
+import AdminOrderDetail from "../pages/admin/OrderDetail";
 import ProductionAreasManagement from "../pages/admin/ProductionAreasManagement";
-import ProductionAreaDetails from "../pages/admin/ProductionAreaDetails"; // Agregar esta importación
+import ProductionAreaDetails from "../pages/admin/ProductionAreaDetails";
 import ProductionConsolidated from "../pages/admin/ProductionConsolidated";
+import UserTemplates from "../pages/user/UserTemplates";
+import EditTemplate from "../pages/user/EditTemplate";
+import AddTemplate from "../pages/user/AddTemplate"; // Add this import
 
 //pages de usuarios
 import UserDashboard from "../pages/user/UserDashboard";
@@ -82,6 +85,9 @@ function AppRouter() {
             <Route path="/user/orders/new" element={<NewOrder />} />
             <Route path="/user/orders/:id" element={<OrderDetail />} />
             <Route path="/user/profile" element={<UserProfile />} />
+            <Route path="/user/templates" element={<UserTemplates />} />
+            <Route path="/user/templates/new" element={<AddTemplate />} /> {/* Add this new route */}
+            <Route path="/user/templates/:id/edit" element={<EditTemplate />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         )}

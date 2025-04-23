@@ -17,6 +17,10 @@ const orderRoutes = require('./modules/sistema/routes/orderRoutes')
 const productionAreaRoutes = require('./modules/sistema/routes/productionAreaRoutes')
 const userProductionAreaRoutes = require('./modules/sistema/routes/userProductionAreaRoutes');
 const productionAuthRoutes = require('./modules/sistema/routes/productionAuthRoutes');
+const templateRoutes = require('./modules/sistema/routes/templateRoutes'); 
+const graphRoutes = require('./modules/sistema/routes/graphRoutes');
+const testNeo4jRoutes = require('./modules/sistema/routes/testRoutes');
+
 
 const app = express();
 
@@ -40,6 +44,9 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/areas-produccion', productionAreaRoutes);
 app.use('/api/user-production-areas', userProductionAreaRoutes);
 app.use('/api/production/auth', productionAuthRoutes);
+app.use('/api/plantillas', templateRoutes); // Nueva línea
+app.use('/api/graph', graphRoutes);
+app.use('/api/test', testNeo4jRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {

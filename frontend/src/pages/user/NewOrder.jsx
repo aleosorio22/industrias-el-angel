@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Añadir useLocation
 import { FiArrowLeft, FiPlus, FiTrash2, FiAlertCircle, FiShoppingCart, FiCalendar } from "react-icons/fi";
 import ProductService from "../../services/ProductService";
 import PresentationProductService from "../../services/PresentationProductService";
 import OrderService from "../../services/OrderService";
 import BranchService from "../../services/BranchService";
+import templateService from "../../services/TemplateService"; // Importar servicio de plantillas
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import ProductSelector from "../../components/user/orders/ProductSelector";
 import OrderSummary from "../../components/user/orders/OrderSummary";
@@ -12,7 +13,8 @@ import { useAuth } from "../../context/AuthContext"; // Asegúrate de importar e
 
 export default function NewOrder() {
   const navigate = useNavigate();
-  const { auth } = useAuth(); // Obtener información de autenticación
+  const location = useLocation(); // Para obtener los parámetros de la URL
+  const { auth } = useAuth();
   const [step, setStep] = useState(1);
   const [products, setProducts] = useState([]);
   const [branches, setBranches] = useState([]);
@@ -24,6 +26,7 @@ export default function NewOrder() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [templateLoaded, setTemplateLoaded] = useState(false); // Para controlar si ya se cargó una plantilla
 
   useEffect(() => {
     // Eliminar la verificación de roles ya que todos los usuarios pueden crear pedidos
@@ -34,6 +37,16 @@ export default function NewOrder() {
     const formattedDate = today.toISOString().split('T')[0];
     setOrderDate(formattedDate);
   }, [auth]);
+
+  // Nuevo useEffect para cargar la plantilla si se proporciona en la URL
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const templateId = queryParams.get('template');
+    
+    if (templateId && !templateLoaded && products.length > 0) {
+      loadTemplateProducts(templateId);
+    }
+  }, [location.search, templateLoaded, products]);
 
   const fetchInitialData = async () => {
     try {
@@ -60,6 +73,77 @@ export default function NewOrder() {
     } catch (err) {
       console.error("Error al cargar datos iniciales:", err);
       setError(err.message || "Error al cargar datos iniciales");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Nueva función para cargar los productos de una plantilla
+  const loadTemplateProducts = async (templateId) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Obtener la plantilla por su ID
+      const template = await templateService.getTemplateById(templateId);
+      
+      if (!template || !template.productos || !Array.isArray(template.productos)) {
+        throw new Error("No se pudo cargar la plantilla o no contiene productos");
+      }
+      
+      // Procesar cada producto de la plantilla
+      const templateItems = [];
+      
+      for (const item of template.productos) {
+        // Buscar el producto en la lista de productos cargados
+        const productDetails = products.find(p => p.id === parseInt(item.producto_id));
+        
+        if (!productDetails) {
+          console.warn(`Producto con ID ${item.producto_id} no encontrado`);
+          continue;
+        }
+        
+        // Obtener las presentaciones del producto
+        const presentationsResponse = await PresentationProductService.getProductPresentations(item.producto_id);
+        
+        let presentationDetails = null;
+        
+        // Manejar diferentes formatos de respuesta
+        if (Array.isArray(presentationsResponse)) {
+          presentationDetails = presentationsResponse.find(
+            p => (p.id === parseInt(item.presentacion_id) || p.presentacion_id === parseInt(item.presentacion_id))
+          );
+        } else if (presentationsResponse && Array.isArray(presentationsResponse.data)) {
+          presentationDetails = presentationsResponse.data.find(
+            p => (p.id === parseInt(item.presentacion_id) || p.presentacion_id === parseInt(item.presentacion_id))
+          );
+        }
+        
+        if (!presentationDetails) {
+          console.warn(`Presentación con ID ${item.presentacion_id} no encontrada para el producto ${item.producto_id}`);
+          continue;
+        }
+        
+        // Crear el item para el pedido
+        templateItems.push({
+          producto_id: parseInt(item.producto_id),
+          producto_nombre: productDetails.nombre,
+          producto_codigo: productDetails.codigo,
+          presentacion_id: parseInt(item.presentacion_id),
+          presentacion_nombre: presentationDetails.presentacion_nombre || presentationDetails.nombre,
+          cantidad_por_presentacion: presentationDetails.cantidad,
+          cantidad: parseInt(item.cantidad),
+          unidad_base: productDetails.unidad_nombre
+        });
+      }
+      
+      // Actualizar el estado con los productos de la plantilla
+      setOrderItems(templateItems);
+      setTemplateLoaded(true);
+      
+    } catch (error) {
+      console.error("Error al cargar productos de la plantilla:", error);
+      setError("No se pudieron cargar los productos de la plantilla");
     } finally {
       setIsLoading(false);
     }

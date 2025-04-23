@@ -111,6 +111,30 @@ const OrderService = {
         message: error.response?.data?.message || "Error al obtener el consolidado de producción"
       };
     }
+  },
+
+  // Asegúrate de que el método updateProductionQuantity esté correctamente implementado
+  updateProductionQuantity: async (date, data) => {
+    try {
+      console.log('Enviando datos al servidor:', data);
+      console.log('URL:', `${API_BASE_URL}/orders/production-consolidated/${date}`);
+      
+      const response = await axios.patch(
+        `${API_BASE_URL}/orders/production-consolidated/${date}`,
+        data,
+        getAuthHeaders()
+      );
+      
+      console.log('Respuesta del servidor:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating production quantity:', error);
+      console.error('Detalles del error:', error.response?.data);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al actualizar la cantidad'
+      };
+    }
   }
 };
 
