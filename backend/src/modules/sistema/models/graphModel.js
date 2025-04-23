@@ -37,7 +37,7 @@ class GraphModel {
         WHERE NOT (u)-[:HA_PEDIDO]->(rec)
         RETURN DISTINCT rec.id AS producto_id, rec.nombre AS nombre
         LIMIT 5
-      `, { usuario_id });
+      `, { usuario_id: Number(usuario_id) }); // 👈 Asegura que sea número
   
       return result.records.map(r => ({
         id: r.get('producto_id'),
