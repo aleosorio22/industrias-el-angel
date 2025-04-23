@@ -1,4 +1,5 @@
 const db = require('../../../core/config/database');
+const GraphModel = require('./graphModel');
 
 class OrderModel {
     /**
@@ -36,6 +37,9 @@ class OrderModel {
             // Confirmar transacción
             await connection.commit();
             connection.release();
+            for (const producto of productos) {
+                await GraphModel.registrarPedido(usuario_id.toString(), producto.nombre_producto || 'Producto');
+            }
             
             return orderId;
         } catch (error) {
