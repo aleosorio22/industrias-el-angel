@@ -37,8 +37,22 @@ class OrderModel {
             // Confirmar transacción
             await connection.commit();
             connection.release();
+            const [[usuarioRow]] = await connection.execute(
+                'SELECT nombre FROM usuarios WHERE id = ?',
+                [usuario_id]
+            );
+            const nombreUsuario = usuarioRow?.nombre || `Usuario${usuario_id}`;
+            
+            // Por cada producto, obtener su nombre desde MySQL
             for (const producto of productos) {
-                await GraphModel.registrarPedido(usuario_id.toString(), producto.nombre_producto || 'Producto');
+                const [[productoRow]] = await connection.execute(
+                    'SELECT nombre FROM productos WHERE id = ?',
+                    [producto.producto_id]
+                );
+                const nombreProducto = productoRow?.nombre || `Producto${producto.producto_id}`;
+            
+                // Guardar en Neo4j con los nombres reales
+                await GraphModel.registrarPedido(nombreUsuario, nombreProducto);
             }
             
             return orderId;
