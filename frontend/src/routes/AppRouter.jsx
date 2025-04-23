@@ -34,6 +34,7 @@ import UserOrders from "../pages/user/UserOrders";
 import UserProfile from "../pages/user/UserProfile";
 import OrderDetail from "../pages/user/OrderDetail";
 import NewOrder from "../pages/user/NewOrder";
+import ExplorePage from "../pages/user/ExplorePage";
 
 function AppRouter() {
   const { auth } = useAuth();
@@ -80,6 +81,7 @@ function AppRouter() {
           <Route path="/" element={<UserLayout />}>
             <Route index element={<Navigate to="/user/dashboard" />} />
             <Route path="/user/dashboard" element={<UserDashboard />} />
+            <Route path="/user/explore" element={<ExplorePage />} />
             <Route path="/user/branches" element={<UserBranches />} />
             <Route path="/user/orders" element={<UserOrders />} />
             <Route path="/user/orders/new" element={<NewOrder />} />
