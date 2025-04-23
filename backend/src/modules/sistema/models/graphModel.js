@@ -6,12 +6,12 @@ class GraphModel {
     try {
       await session.run(`
         MERGE (u:Usuario {id: $usuario_id})
-          ON CREATE SET u.nombre = $usuario_nombre
-          ON MATCH SET u.nombre = $usuario_nombre
+          ON CREATE SET u.nombre = $usuario_nombre, u.label = $usuario_nombre
+          ON MATCH SET u.nombre = $usuario_nombre, u.label = $usuario_nombre
   
         MERGE (p:Producto {id: $producto_id})
-          ON CREATE SET p.nombre = $producto_nombre
-          ON MATCH SET p.nombre = $producto_nombre
+          ON CREATE SET p.nombre = $producto_nombre, p.label = $producto_nombre
+          ON MATCH SET p.nombre = $producto_nombre, p.label = $producto_nombre
   
         MERGE (u)-[:HA_PEDIDO]->(p)
       `, {
@@ -26,6 +26,7 @@ class GraphModel {
       await session.close();
     }
   }
+  
   
 
   static async recomendarProductos(usuario) {
