@@ -52,7 +52,10 @@ class OrderModel {
                 const nombreProducto = productoRow?.nombre || `Producto${producto.producto_id}`;
             
                 // Guardar en Neo4j con los nombres reales
-                await GraphModel.registrarPedido(nombreUsuario, nombreProducto);
+                await GraphModel.registrarPedido(
+                    { id: usuario_id, nombre: nombreUsuario },
+                    { id: producto.producto_id, nombre: nombreProducto }
+                  );
             }
             
             return orderId;
