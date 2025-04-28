@@ -54,4 +54,19 @@ const isAdmin = (req, res, next) => {
     }
 };
 
-module.exports = { authMiddleware, isAdmin };
+// Middleware para verificar si el usuario es repartidor o admin
+const isDeliveryOrAdmin = (req, res, next) => {
+    if (req.user.rol === 'admin' || req.user.rol === 'repartidor') {
+        return next();
+    }
+    return res.status(403).json({
+        success: false,
+        message: 'Acceso denegado. Se requiere rol de administrador o repartidor'
+    });
+};
+
+module.exports = {
+    authMiddleware,
+    isAdmin,
+    isDeliveryOrAdmin
+};
