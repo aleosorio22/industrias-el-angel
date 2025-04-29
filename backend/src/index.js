@@ -20,7 +20,7 @@ const productionAuthRoutes = require('./modules/sistema/routes/productionAuthRou
 const templateRoutes = require('./modules/sistema/routes/templateRoutes'); 
 const graphRoutes = require('./modules/sistema/routes/graphRoutes');
 const testNeo4jRoutes = require('./modules/sistema/routes/testRoutes');
-
+const deliveryRoutes = require('./modules/sistema/routes/deliveryRoutes'); // Nue
 
 const app = express();
 
@@ -41,6 +41,7 @@ app.use('/api/conversions', conversionRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/branches', branchRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/entregas', deliveryRoutes);
 app.use('/api/areas-produccion', productionAreaRoutes);
 app.use('/api/user-production-areas', userProductionAreaRoutes);
 app.use('/api/production/auth', productionAuthRoutes);

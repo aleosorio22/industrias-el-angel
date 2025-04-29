@@ -5,32 +5,49 @@ class GraphModel {
     const session = driver.session();
     try {
       await session.run(`
-        MERGE (u:Usuario {nombre: $usuario})
-        MERGE (p:Producto {nombre: $producto})
+        MERGE (u:Usuario {id: $usuario_id})
+          ON CREATE SET u.nombre = $usuario_nombre, u.label = $usuario_nombre
+          ON MATCH SET u.nombre = $usuario_nombre, u.label = $usuario_nombre
+  
+        MERGE (p:Producto {id: $producto_id})
+          ON CREATE SET p.nombre = $producto_nombre, p.label = $producto_nombre
+          ON MATCH SET p.nombre = $producto_nombre, p.label = $producto_nombre
+  
         MERGE (u)-[:HA_PEDIDO]->(p)
-      `, { usuario, producto });
+      `, {
+        usuario_id: usuario.id,
+        usuario_nombre: usuario.nombre,
+        producto_id: producto.id,
+        producto_nombre: producto.nombre,
+      });
     } catch (err) {
       console.error("❌ Error Neo4j:", err);
     } finally {
       await session.close();
     }
   }
+  
+  
 
-  static async recomendarProductos(usuario) {
+  static async recomendarProductos(usuario_id) {
     const session = driver.session();
     try {
       const result = await session.run(`
-        MATCH (u:Usuario {nombre: $usuario})-[:HA_PEDIDO]->(:Producto)<-[:HA_PEDIDO]-(otros:Usuario)-[:HA_PEDIDO]->(recomendado:Producto)
-        WHERE NOT (u)-[:HA_PEDIDO]->(recomendado)
-        RETURN DISTINCT recomendado.nombre AS producto
+        MATCH (u:Usuario {id: $usuario_id})-[:HA_PEDIDO]->(:Producto)<-[:HA_PEDIDO]-(otros:Usuario)-[:HA_PEDIDO]->(rec:Producto)
+        WHERE NOT (u)-[:HA_PEDIDO]->(rec)
+        RETURN DISTINCT rec.id AS producto_id, rec.nombre AS nombre
         LIMIT 5
-      `, { usuario });
-
-      return result.records.map(r => r.get('producto'));
+      `, { usuario_id: Number(usuario_id) }); // 👈 Asegura que sea número
+  
+      return result.records.map(r => ({
+        id: r.get('producto_id'),
+        nombre: r.get('nombre'),
+      }));
     } finally {
       await session.close();
     }
   }
+  
   static async testConnection() {
     try {
         const session = driver.session();

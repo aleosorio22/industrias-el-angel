@@ -26,6 +26,8 @@ export default function Login() {
 
       if (response.user.rol === "admin") {
         navigate("/admin/dashboard")
+      } else if (response.user.rol === "repartidor") {
+        navigate("/delivery/dashboard")
       } else {
         navigate("/user/dashboard")
       }
