@@ -7,7 +7,7 @@ class DeliveryModel {
      * @returns {Promise<Object>} - ID de la entrega y si fue creada o actualizada
      */
     static async registerDelivery(deliveryData) {
-        const { pedido_id, producto_id, cantidad_entregada, comentario, usuario_id } = deliveryData;
+        const { pedido_id, producto_id, presentacion_id, cantidad_entregada, comentario, usuario_id } = deliveryData;
         
         // Validar que el pedido existe
         const [pedidoRows] = await db.execute(
@@ -29,20 +29,20 @@ class DeliveryModel {
             throw new Error(`El producto con ID ${producto_id} no existe`);
         }
         
-        // Validar que el producto está en el pedido
+        // Validar que el producto está en el pedido con la presentación correcta
         const [pedidoDetalleRows] = await db.execute(
-            'SELECT id FROM pedido_detalle WHERE pedido_id = ? AND producto_id = ?',
-            [pedido_id, producto_id]
+            'SELECT id FROM pedido_detalle WHERE pedido_id = ? AND producto_id = ? AND presentacion_id = ?',
+            [pedido_id, producto_id, presentacion_id]
         );
         
         if (pedidoDetalleRows.length === 0) {
-            throw new Error(`El producto con ID ${producto_id} no está en el pedido con ID ${pedido_id}`);
+            throw new Error(`El producto con ID ${producto_id} y presentación ${presentacion_id} no está en el pedido con ID ${pedido_id}`);
         }
         
-        // Verificar si ya existe una entrega para este pedido y producto
+        // Verificar si ya existe una entrega para este pedido, producto y presentación
         const [existingDelivery] = await db.execute(
-            'SELECT id FROM pedido_entrega WHERE pedido_id = ? AND producto_id = ?',
-            [pedido_id, producto_id]
+            'SELECT id FROM pedido_entrega WHERE pedido_id = ? AND producto_id = ? AND presentacion_id = ?',
+            [pedido_id, producto_id, presentacion_id]
         );
         
         let result;
@@ -62,8 +62,8 @@ class DeliveryModel {
         } else {
             // Insertar nueva entrega
             [result] = await db.execute(
-                'INSERT INTO pedido_entrega (pedido_id, producto_id, cantidad_entregada, comentario, usuario_id) VALUES (?, ?, ?, ?, ?)',
-                [pedido_id, producto_id, cantidad_entregada, comentario || null, usuario_id]
+                'INSERT INTO pedido_entrega (pedido_id, producto_id, presentacion_id, cantidad_entregada, comentario, usuario_id) VALUES (?, ?, ?, ?, ?, ?)',
+                [pedido_id, producto_id, presentacion_id, cantidad_entregada, comentario || null, usuario_id]
             );
             return { 
                 id: result.insertId, 
@@ -81,9 +81,11 @@ class DeliveryModel {
         const [deliveries] = await db.execute(`
             SELECT pe.*, 
                    p.nombre as producto_nombre,
+                   pres.nombre as presentacion_nombre,
                    u.nombre as usuario_nombre
             FROM pedido_entrega pe
             JOIN productos p ON pe.producto_id = p.id
+            JOIN presentaciones pres ON pe.presentacion_id = pres.id
             LEFT JOIN usuarios u ON pe.usuario_id = u.id
             WHERE pe.pedido_id = ?
             ORDER BY pe.fecha_entrega DESC
@@ -149,9 +151,11 @@ class DeliveryModel {
             // Obtener entregas del pedido
             const [deliveries] = await db.execute(`
                 SELECT pe.*,
-                       pr.nombre as producto_nombre
+                       pr.nombre as producto_nombre,
+                       pres.nombre as presentacion_nombre
                 FROM pedido_entrega pe
                 JOIN productos pr ON pe.producto_id = pr.id
+                JOIN presentaciones pres ON pe.presentacion_id = pres.id
                 WHERE pe.pedido_id = ?
             `, [order.id]);
             
@@ -168,6 +172,7 @@ class DeliveryModel {
                 order.productos_entregados = deliveries.map(delivery => ({
                     producto_id: delivery.producto_id,
                     nombre: delivery.producto_nombre,
+                    presentacion: delivery.presentacion_nombre,
                     cantidad_entregada: delivery.cantidad_entregada,
                     fecha_entrega: delivery.fecha_entrega
                 }));

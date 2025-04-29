@@ -96,7 +96,8 @@ class OrderController {
             
             // Verificar que el usuario tenga acceso al pedido
             const isAdmin = req.user.rol === 'admin';
-            if (!isAdmin && order.usuario_id !== req.user.id) {
+            const isDelivery = req.user.rol === 'repartidor';
+            if (!isAdmin && !isDelivery && order.usuario_id !== req.user.id) {
                 return res.status(403).json({ 
                     success: false, 
                     message: 'No tienes permiso para ver este pedido' 
@@ -289,6 +290,38 @@ class OrderController {
           });
         }
       }
+
+    /**
+     * Obtiene los pedidos para una fecha específica
+     * @param {Object} req - Objeto de solicitud
+     * @param {Object} res - Objeto de respuesta
+     */
+    static async getOrdersByDate(req, res) {
+        try {
+            const { date } = req.params;
+            const { status } = req.query;
+            
+            if (!date) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Se requiere una fecha para filtrar los pedidos'
+                });
+            }
+            
+            const orders = await OrderModel.findByDate(date, status);
+            
+            res.json({
+                success: true,
+                data: orders
+            });
+        } catch (error) {
+            console.error('Error al obtener pedidos por fecha:', error);
+            res.status(500).json({ 
+                success: false, 
+                message: 'Error al obtener los pedidos por fecha' 
+            });
+        }
+    }
 }
 
 module.exports = OrderController;

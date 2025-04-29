@@ -135,7 +135,86 @@ const OrderService = {
         message: error.response?.data?.message || 'Error al actualizar la cantidad'
       };
     }
-  }
+  },
+  // Registrar entrega de producto
+  registerDelivery: async (deliveryData) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/entregas`,
+        deliveryData,
+        getAuthHeaders()
+      );
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      console.error('Error registering delivery:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al registrar la entrega'
+      };
+    }
+  },
+
+  // Cambiar estado del pedido a "en ruta"
+  markOrderAsInRoute: async (orderId) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/entregas/enruta/${orderId}`,
+        {},
+        getAuthHeaders()
+      );
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      console.error('Error marking order as in route:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al marcar el pedido como en ruta'
+      };
+    }
+  },
+
+  // Cambiar estado del pedido a "entregado"
+  markOrderAsDelivered: async (orderId) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/entregas/entregado/${orderId}`,
+        {},
+        getAuthHeaders()
+      );
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      console.error('Error marking order as delivered:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al marcar el pedido como entregado'
+      };
+    }
+  },
+  getOrdersByDate: async (date, status = 'all') => {
+      try {
+        const url = `${API_BASE_URL}/orders/by-date/${date}${status !== 'all' ? `?status=${status}` : ''}`;
+        const response = await axios.get(url, getAuthHeaders());
+        
+        return {
+          success: true,
+          data: response.data.data || []
+        };
+      } catch (error) {
+        console.error('Error fetching orders by date:', error);
+        return {
+          success: false,
+          message: error.response?.data?.message || 'Error al cargar los pedidos por fecha'
+        };
+      }
+    },
 };
 
 export default OrderService;

@@ -9,12 +9,12 @@ class DeliveryController {
      */
     static async registerDelivery(req, res) {
         try {
-            const { pedido_id, producto_id, cantidad_entregada, comentario } = req.body;
+            const { pedido_id, producto_id, presentacion_id, cantidad_entregada, comentario } = req.body;
             
-            if (!pedido_id || !producto_id || cantidad_entregada === undefined) {
+            if (!pedido_id || !producto_id || !presentacion_id || cantidad_entregada === undefined) {
                 return res.status(400).json({ 
                     success: false, 
-                    message: 'Datos incompletos. Se requiere pedido_id, producto_id y cantidad_entregada' 
+                    message: 'Datos incompletos. Se requiere pedido_id, producto_id, presentacion_id y cantidad_entregada' 
                 });
             }
             
@@ -29,6 +29,7 @@ class DeliveryController {
             const deliveryData = {
                 pedido_id,
                 producto_id,
+                presentacion_id,
                 cantidad_entregada,
                 comentario,
                 usuario_id: req.user.id

@@ -41,7 +41,7 @@ app.use('/api/conversions', conversionRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/branches', branchRoutes);
 app.use('/api/orders', orderRoutes);
-app.use('/api/deliveries', deliveryRoutes);
+app.use('/api/entregas', deliveryRoutes);
 app.use('/api/areas-produccion', productionAreaRoutes);
 app.use('/api/user-production-areas', userProductionAreaRoutes);
 app.use('/api/production/auth', productionAuthRoutes);

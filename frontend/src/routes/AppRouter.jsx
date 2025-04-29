@@ -41,6 +41,7 @@ import ExplorePage from "../pages/user/ExplorePage";
 import DeliveryDashboard from "../pages/delivery/DeliveryDashboard";
 import DeliveryOrders from "../pages/delivery/DeliveryOrders";
 import DeliveryProfile from "../pages/delivery/DeliveryProfile";
+import DeliveryOrderDetail from "../pages/delivery/DeliveryOrderDetail";
 
 function AppRouter() {
   const { auth } = useAuth();
@@ -89,6 +90,7 @@ function AppRouter() {
             <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
             <Route path="/delivery/orders" element={<DeliveryOrders />} />
             <Route path="/delivery/profile" element={<DeliveryProfile />} />
+            <Route path="/delivery/orders/:id" element={<DeliveryOrderDetail />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         ) : (
