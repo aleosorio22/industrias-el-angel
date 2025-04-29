@@ -360,6 +360,69 @@ class OrderModel {
         const [results] = await db.execute(query, [date]);
         return results;
     }
+
+        /**
+     * Obtiene los pedidos para una fecha específica
+     * @param {string} date - Fecha en formato YYYY-MM-DD
+     * @param {string} status - Estado del pedido (opcional)
+     * @returns {Promise<Array>} - Lista de pedidos
+     */
+    static async findByDate(date, status = null) {
+        let query = `
+            SELECT p.*, 
+                   c.nombre as cliente_nombre, 
+                   s.nombre as sucursal_nombre,
+                   (SELECT COUNT(*) FROM pedido_detalle WHERE pedido_id = p.id) as total_productos
+            FROM pedidos p
+            LEFT JOIN clientes c ON p.cliente_id = c.id
+            LEFT JOIN sucursales s ON p.sucursal_id = s.id
+            WHERE DATE(p.fecha) = ?
+        `;
+        
+        const params = [date];
+        
+        if (status && status !== 'all') {
+            query += ' AND p.estado = ?';
+            params.push(status);
+        }
+        
+        query += ' ORDER BY p.id DESC';
+        
+        const [orders] = await db.execute(query, params);
+        return orders;
+    }
+
+        /**
+     * Obtiene los pedidos para una fecha específica
+     * @param {string} date - Fecha en formato YYYY-MM-DD
+     * @param {string} status - Estado del pedido (opcional)
+     * @returns {Promise<Array>} - Lista de pedidos
+     */
+    static async findByDate(date, status = null) {
+        let query = `
+            SELECT p.*, 
+                   c.nombre as cliente_nombre, 
+                   s.nombre as sucursal_nombre,
+                   (SELECT COUNT(*) FROM pedido_detalle WHERE pedido_id = p.id) as total_productos
+            FROM pedidos p
+            LEFT JOIN clientes c ON p.cliente_id = c.id
+            LEFT JOIN sucursales s ON p.sucursal_id = s.id
+            WHERE DATE(p.fecha) = ?
+        `;
+        
+        const params = [date];
+        
+        if (status && status !== 'all') {
+            query += ' AND p.estado = ?';
+            params.push(status);
+        }
+        
+        query += ' ORDER BY p.id DESC';
+        
+        const [orders] = await db.execute(query, params);
+        return orders;
+    }
+
     static async updateProductionQuantity(date, producto_id, total_unidades) {
         const connection = await db.getConnection();
         try {
@@ -420,6 +483,7 @@ class OrderModel {
         connection.release();
     }
 }
+
     
 }
 

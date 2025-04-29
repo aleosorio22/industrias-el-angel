@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiPackage, FiAlertCircle, FiRefreshCw, FiCalendar, FiMapPin, FiFileText } from "react-icons/fi";
+import { FiArrowLeft, FiPackage, FiAlertCircle, FiRefreshCw, FiCalendar, FiMapPin, FiFileText, FiCheck, FiX } from "react-icons/fi";
 import OrderService from "../../services/OrderService";
+import DeliveryService from "../../services/DeliveryService"; // Añadimos el servicio de entregas
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import OrderStatusBadge from "../../components/user/orders/OrderStatusBadge";
 import { formatDate } from '../../utils/dateUtils';
@@ -10,6 +11,7 @@ export default function OrderDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
+  const [deliveries, setDeliveries] = useState([]); // Estado para almacenar las entregas
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -22,10 +24,18 @@ export default function OrderDetail() {
       setIsLoading(true);
       setError(null);
 
+      // Obtener detalles del pedido
       const response = await OrderService.getOrderById(id);
 
       if (response.success) {
         setOrder(response.data);
+        
+        // Obtener entregas existentes
+        const deliveriesResponse = await DeliveryService.getDeliveriesByOrderId(id);
+        
+        if (deliveriesResponse.success) {
+          setDeliveries(deliveriesResponse.data);
+        }
       } else {
         setError("No se pudo cargar el detalle del pedido");
       }
@@ -37,7 +47,30 @@ export default function OrderDetail() {
     }
   };
 
-  // Eliminamos la función formatDate local ya que estamos usando la importada
+  // Función para formatear números sin decimales innecesarios
+  const formatQuantity = (quantity) => {
+    return Number.isInteger(Number(quantity)) ? 
+      parseInt(quantity).toString() : 
+      Number(quantity).toFixed(2);
+  };
+  
+  // Función para obtener el estado de entrega de un producto
+  const getDeliveryStatus = (detalle) => {
+    const delivery = deliveries.find(
+      d => d.producto_id === detalle.producto_id && 
+           d.presentacion_id === detalle.presentacion_id
+    );
+    
+    const deliveredQuantity = delivery?.cantidad_entregada || 0;
+    
+    if (deliveredQuantity >= detalle.cantidad) {
+      return { status: 'complete', label: 'Completo', className: 'bg-green-100 text-green-800' };
+    } else if (deliveredQuantity > 0) {
+      return { status: 'partial', label: 'Parcial', className: 'bg-yellow-100 text-yellow-800' };
+    } else {
+      return { status: 'pending', label: 'Pendiente', className: 'bg-gray-100 text-gray-800' };
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 pb-20">
@@ -121,40 +154,120 @@ export default function OrderDetail() {
                 <h2 className="font-semibold">Productos</h2>
               </div>
               
+              {/*En la sección de renderizado de productos:*/}
               <div className="divide-y divide-gray-100">
-                {order.detalles && order.detalles.map((detalle) => (
-                  <div key={detalle.id} className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-medium">{detalle.producto_nombre}</h3>
-                        <p className="text-sm text-gray-500">Código: {detalle.producto_codigo}</p>
+                {order.detalles && order.detalles.map((detalle) => {
+                  const deliveryStatus = getDeliveryStatus(detalle);
+                  const delivery = deliveries.find(
+                    d => d.producto_id === detalle.producto_id && 
+                         d.presentacion_id === detalle.presentacion_id
+                  );
+                  const deliveredQuantity = delivery?.cantidad_entregada || 0;
+                  const isOrderDelivered = order.estado === 'entregado';
+                  
+                  return (
+                    <div key={`${detalle.producto_id}-${detalle.presentacion_id}`} className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="font-medium">{detalle.producto_nombre}</h3>
+                          <p className="text-sm text-gray-500">Código: {detalle.producto_codigo}</p>
+                        </div>
+                        <div className="flex items-center">
+                          <span className={`text-xs px-2 py-1 rounded-full ${deliveryStatus.className}`}>
+                            {deliveryStatus.label}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="font-medium">{detalle.cantidad}</span>
-                        <p className="text-sm text-gray-500">{detalle.presentacion_nombre}</p>
+                      
+                      <div className="bg-gray-50 p-3 rounded-md">
+                        <div className="flex flex-col sm:flex-row sm:justify-between mb-2">
+                          <span className="text-sm text-gray-600 mb-1 sm:mb-0">Cantidad solicitada:</span>
+                          <span className="text-sm font-medium">{formatQuantity(detalle.cantidad)} {detalle.presentacion_nombre}</span>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center">
+                          <span className="text-sm text-gray-600 mb-1 sm:mb-0">
+                            {isOrderDelivered ? 'Cantidad entregada:' : 'Cantidad a entregar:'}
+                          </span>
+                          <span className="text-sm font-medium">
+                            {formatQuantity(deliveredQuantity)} {detalle.presentacion_nombre}
+                          </span>
+                        </div>
+                        
+                        {deliveryStatus.status === 'partial' && (
+                          <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mt-1">
+                            <span className="text-sm text-gray-600 mb-1 sm:mb-0">Diferencia:</span>
+                            <span className="text-sm font-medium text-yellow-600">
+                              {formatQuantity(detalle.cantidad - deliveredQuantity)} {detalle.presentacion_nombre}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {delivery?.comentario && (
+                          <div className="mt-2 text-sm text-gray-600 italic border-t border-gray-200 pt-2">
+                            "{delivery.comentario}"
+                          </div>
+                        )}
                       </div>
                     </div>
-                    
-                    <div className="bg-gray-50 p-2 rounded-md text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Cantidad por presentación:</span>
-                        <span className="font-medium">{detalle.cantidad_por_presentacion}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Total unidades:</span>
-                        <span className="font-medium">{detalle.cantidad * detalle.cantidad_por_presentacion}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               
               {/* Resumen del pedido */}
               <div className="p-4 bg-gray-50 rounded-b-lg">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-2">
                   <span className="font-medium">Total productos:</span>
                   <span className="font-medium">{order.detalles?.length || 0}</span>
                 </div>
+                
+                {/* Resumen de entregas */}
+                {deliveries.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 text-center mt-3 pt-3 border-t border-gray-200">
+                    <div className="bg-green-50 p-2 rounded-md">
+                      <FiCheck className="mx-auto text-green-500 mb-1" />
+                      <div className="text-xl sm:text-sm font-semibold text-green-700">
+                        {order.detalles?.filter(d => {
+                          const delivery = deliveries.find(
+                            del => del.producto_id === d.producto_id && 
+                                  del.presentacion_id === d.presentacion_id
+                          );
+                          return delivery?.cantidad_entregada >= d.cantidad;
+                        }).length || 0}
+                      </div>
+                      <div className="text-xs text-green-600">Completos</div>
+                    </div>
+                    
+                    <div className="bg-yellow-50 p-2 rounded-md">
+                      <FiAlertCircle className="mx-auto text-yellow-500 mb-1" />
+                      <div className="text-xl sm:text-sm font-semibold text-yellow-700">
+                        {order.detalles?.filter(d => {
+                          const delivery = deliveries.find(
+                            del => del.producto_id === d.producto_id && 
+                                  del.presentacion_id === d.presentacion_id
+                          );
+                          const qty = delivery?.cantidad_entregada || 0;
+                          return qty > 0 && qty < d.cantidad;
+                        }).length || 0}
+                      </div>
+                      <div className="text-xs text-yellow-600">Parciales</div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-2 rounded-md border border-gray-200">
+                      <FiPackage className="mx-auto text-gray-500 mb-1" />
+                      <div className="text-xl sm:text-sm font-semibold text-gray-700">
+                        {order.detalles?.filter(d => {
+                          const delivery = deliveries.find(
+                            del => del.producto_id === d.producto_id && 
+                                  del.presentacion_id === d.presentacion_id
+                          );
+                          return !delivery || delivery.cantidad_entregada === 0;
+                        }).length || 0}
+                      </div>
+                      <div className="text-xs text-gray-600">Pendientes</div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             

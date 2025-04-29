@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 // Layouts
 import AdminLayout from "../layouts/AdminLayout";
 import UserLayout from "../layouts/UserLayout";
+import DeliveryLayout from "../layouts/DeliveryLayout";
 
 // Pages
 import Login from "../pages/Login";
@@ -35,6 +36,12 @@ import UserProfile from "../pages/user/UserProfile";
 import OrderDetail from "../pages/user/OrderDetail";
 import NewOrder from "../pages/user/NewOrder";
 import ExplorePage from "../pages/user/ExplorePage";
+
+//pages de delivery
+import DeliveryDashboard from "../pages/delivery/DeliveryDashboard";
+import DeliveryOrders from "../pages/delivery/DeliveryOrders";
+import DeliveryProfile from "../pages/delivery/DeliveryProfile";
+import DeliveryOrderDetail from "../pages/delivery/DeliveryOrderDetail";
 
 function AppRouter() {
   const { auth } = useAuth();
@@ -75,6 +82,15 @@ function AppRouter() {
             <Route path="/admin/production/consolidated" element={<ProductionConsolidated />} />
             <Route path="/admin/production-areas" element={<ProductionAreasManagement />} />
             <Route path="/admin/production-areas/:id/details" element={<ProductionAreaDetails />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        ) : auth.user.rol === 'repartidor' ? (
+          <Route path="/" element={<DeliveryLayout />}>
+            <Route index element={<Navigate to="/delivery/dashboard" />} />
+            <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+            <Route path="/delivery/orders" element={<DeliveryOrders />} />
+            <Route path="/delivery/profile" element={<DeliveryProfile />} />
+            <Route path="/delivery/orders/:id" element={<DeliveryOrderDetail />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         ) : (
