@@ -322,6 +322,29 @@ class OrderController {
             });
         }
     }
+
+    /**
+     * Obtiene los pedidos entregados pendientes de pago
+     * @param {Object} req - Objeto de solicitud
+     * @param {Object} res - Objeto de respuesta
+     */
+    static async getPendingPaymentOrders(req, res) {
+        try {
+            const clienteId = req.query.clienteId || null;
+            const orders = await OrderModel.findDeliveredPendingPayment(clienteId);
+            
+            res.json({
+                success: true,
+                data: orders
+            });
+        } catch (error) {
+            console.error('Error al obtener pedidos pendientes de pago:', error);
+            res.status(500).json({ 
+                success: false, 
+                message: 'Error al obtener los pedidos pendientes de pago' 
+            });
+        }
+    }
 }
 
 module.exports = OrderController;

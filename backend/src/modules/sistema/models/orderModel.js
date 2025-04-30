@@ -130,6 +130,45 @@ class OrderModel {
         const [orders] = await db.execute(query);
         return orders;
     }
+
+    /**
+    * Encuentra pedidos entregados (pendientes de pago)
+    * @param {number|null} clienteId - ID del cliente (opcional)
+    * @returns {Promise<Array>} - Lista de pedidos
+    */
+    static async findDeliveredPendingPayment(clienteId = null) {
+        let query = `
+            SELECT p.*, 
+                   c.nombre as cliente_nombre, 
+                   s.nombre as sucursal_nombre,
+                   (SELECT COUNT(*) FROM pedido_detalle WHERE pedido_id = p.id) as total_productos,
+                   (SELECT SUM(pd.cantidad * pp.precio) 
+                    FROM pedido_detalle pd
+                    JOIN producto_presentacion pp ON pd.producto_id = pp.producto_id AND pd.presentacion_id = pp.presentacion_id
+                    WHERE pd.pedido_id = p.id) as monto
+            FROM pedidos p
+            LEFT JOIN clientes c ON p.cliente_id = c.id
+            LEFT JOIN sucursales s ON p.sucursal_id = s.id
+            WHERE p.estado = 'entregado'
+        `;
+        
+        const params = [];
+        
+        if (clienteId) {
+            query += ' AND p.cliente_id = ?';
+            params.push(clienteId);
+        }
+        
+        query += ' ORDER BY p.fecha DESC';
+        
+        console.log('Query de pedidos entregados:', query);
+        console.log('Parámetros:', params);
+        
+        const [orders] = await db.execute(query, params);
+        console.log('Pedidos encontrados:', orders.length);
+        
+        return orders;
+    }
     
     /**
      * Obtiene un pedido por su ID con todos sus detalles
@@ -470,10 +509,12 @@ class OrderModel {
             arrobas_necesarias: Number(info.arrobas_necesarias),
             libras_necesarias: Number(info.libras_necesarias)
         };
-    } finally {
+    } 
+    finally {
         connection.release();
     }
 }
+
 
     
 }

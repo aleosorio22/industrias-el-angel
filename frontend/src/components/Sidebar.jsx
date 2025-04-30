@@ -18,7 +18,8 @@ import {
   FiTag,
   FiHash,
   FiBox, 
-  FiLayers
+  FiLayers,
+  FiDollarSign
 } from "react-icons/fi"
 
 // Creamos un contexto para compartir el estado del sidebar
@@ -77,6 +78,7 @@ export default function Sidebar() {
     { name: "Configuración", icon: FiSettings, path: "/admin/settings" },
     { name: "Ayuda", icon: FiHelpCircle, path: "/admin/help" },
     { name: "Clientes", icon: FiUsers, path: "/admin/clients" },
+    { name: "Cobro de ventas", icon: FiDollarSign, path: "/admin/accounts-receivable" },
     { name: "Áreas de Producción", icon: FiLayers, path: "/admin/production-areas" },
   ]
 

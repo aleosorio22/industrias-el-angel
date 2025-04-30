@@ -214,7 +214,55 @@ const OrderService = {
           message: error.response?.data?.message || 'Error al cargar los pedidos por fecha'
         };
       }
-    },
+  },
+  getPendingPaymentOrders: async (clientId = null, page = 1, pageSize = 10) => {
+    try {
+      let url = `${API_BASE_URL}/orders/pendientes-pago`;
+      
+      // Agregar parámetros de consulta si existen
+      const params = new URLSearchParams();
+      if (clientId) params.append('clienteId', clientId);
+      
+      // Añadir parámetros a la URL si hay alguno
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+      
+      console.log('Consultando URL:', url); // Para depuración
+      
+      const response = await axios.get(url, getAuthHeaders());
+      
+      if (!response.data || !response.data.data) {
+        return {
+          success: true,
+          data: { orders: [], total: 0 }
+        };
+      }
+      
+      // Obtener todos los pedidos primero
+      const allOrders = response.data.data;
+      
+      // Calcular paginación en el cliente
+      const total = allOrders.length;
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const paginatedOrders = allOrders.slice(startIndex, endIndex);
+      
+      return {
+        success: true,
+        data: {
+          orders: paginatedOrders,
+          total: total
+        }
+      };
+    } catch (error) {
+      console.error('Error al obtener pedidos pendientes de pago:', error);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al cargar los pedidos pendientes de pago'
+      };
+    }
+  },
 };
 
 export default OrderService;
