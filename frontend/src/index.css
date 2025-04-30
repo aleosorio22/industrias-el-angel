@@ -13,11 +13,14 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 12%;
 
-    --primary: 118 100% 35%;
+    /* Ajustamos el color primario a un verde más cercano al de las imágenes */
+    --primary: 122 39% 49%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 19% 47%;
+    --secondary: 242, 100%, 99%;
     --secondary-foreground: 0 0% 100%;
+
+    --sidebar: 46, 0%, 85%;
 
     --muted: 210 20% 96%;
     --muted-foreground: 215 16% 47%;
@@ -30,12 +33,10 @@
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 152 65% 45%;
+    --ring: 122 39% 49%;
 
     --radius: 0.625rem;
   }
-
-  
 
   html {
     font-family: "Inter", system-ui, sans-serif;

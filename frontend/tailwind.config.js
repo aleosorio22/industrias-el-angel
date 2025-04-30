@@ -46,6 +46,14 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Añadimos colores específicos para el sidebar
+        sidebar: {
+          DEFAULT: "#ffffff", // Fondo blanco como en las imágenes
+          hover: "#f5f5f5",
+          active: "#4CAF50", // Verde para elementos activos
+          text: "#333333",
+          icon: "#4CAF50", // Verde para iconos
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
