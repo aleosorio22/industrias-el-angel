@@ -23,7 +23,7 @@ router.get('/pendientes-pago', orderController.getPendingPaymentOrders);
 router.get('/', isDeliveryOrAdmin, orderController.getOrders);
 
 // Rutas con parámetro ID (deben ir AL FINAL)
-router.get('/:id', isDeliveryOrAdmin, orderController.getOrderById);
+router.get('/:id', orderController.getOrderById);
 router.patch('/:id/status', isDeliveryOrAdmin, orderController.updateOrderStatus);
 
 module.exports = router;
