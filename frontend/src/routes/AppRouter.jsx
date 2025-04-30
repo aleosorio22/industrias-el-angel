@@ -19,14 +19,13 @@ import ProductsManagement from "../pages/admin/ProductsManagement";
 import ProductDetails from "../pages/admin/ProductDetails";
 import ClientsManagement from "../pages/admin/ClientsManagement";
 import ClientDetails from "../pages/admin/ClientDetails";
+import AccountsReceivable from "../pages/admin/AccountsReceivable";
+import DeliveredOrderDetail from "../pages/admin/DeliveredOrderDetail";
 import OrdersManagement from "../pages/admin/OrdersManagement";
 import AdminOrderDetail from "../pages/admin/OrderDetail";
 import ProductionAreasManagement from "../pages/admin/ProductionAreasManagement";
 import ProductionAreaDetails from "../pages/admin/ProductionAreaDetails";
 import ProductionConsolidated from "../pages/admin/ProductionConsolidated";
-import UserTemplates from "../pages/user/UserTemplates";
-import EditTemplate from "../pages/user/EditTemplate";
-import AddTemplate from "../pages/user/AddTemplate"; // Add this import
 
 //pages de usuarios
 import UserDashboard from "../pages/user/UserDashboard";
@@ -35,7 +34,11 @@ import UserOrders from "../pages/user/UserOrders";
 import UserProfile from "../pages/user/UserProfile";
 import OrderDetail from "../pages/user/OrderDetail";
 import NewOrder from "../pages/user/NewOrder";
+import UserTemplates from "../pages/user/UserTemplates";
+import EditTemplate from "../pages/user/EditTemplate";
+import AddTemplate from "../pages/user/AddTemplate"; 
 import ExplorePage from "../pages/user/ExplorePage";
+
 
 //pages de delivery
 import DeliveryDashboard from "../pages/delivery/DeliveryDashboard";
@@ -77,6 +80,8 @@ function AppRouter() {
             <Route path="/admin/products/:id/details" element={<ProductDetails />} />
             <Route path="/admin/clients" element={<ClientsManagement />} />
             <Route path="/admin/clients/:id/details" element={<ClientDetails />} />
+            <Route path="/admin/accounts-receivable" element={<AccountsReceivable />} />
+            <Route path="/admin/delivered-orders/:id" element={<DeliveredOrderDetail />} />
             <Route path="/admin/orders" element={<OrdersManagement />} />
             <Route path="/admin/orders/:id" element={<AdminOrderDetail />} />
             <Route path="/admin/production/consolidated" element={<ProductionConsolidated />} />
