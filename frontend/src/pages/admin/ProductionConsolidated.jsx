@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import OrderService from '../../services/OrderService';
 import { formatDateForInput } from '../../utils/dateUtils';
 import usePDFGenerator from '../../hooks/usePDFGenerator';
 import { toast } from 'react-toastify';
+import { FiArrowLeft } from 'react-icons/fi';
 
 // Componentes
 import Header from './components/production/Header';
@@ -12,6 +13,7 @@ import LoadingSpinner from './components/production/LoadingSpinner';
 
 const ProductionConsolidated = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,6 +21,13 @@ const ProductionConsolidated = () => {
     location.state?.selectedDate || formatDateForInput(new Date())
   );
   const [updatingProduct, setUpdatingProduct] = useState(false);
+
+  // Efecto para actualizar la fecha cuando cambia en la ubicación
+  useEffect(() => {
+    if (location.state?.selectedDate) {
+      setDateFilter(location.state.selectedDate);
+    }
+  }, [location.state]);
 
   const fetchConsolidated = async () => {
     try {
@@ -166,8 +175,10 @@ const ProductionConsolidated = () => {
     }
   };
 
+
   return (
     <div className="container mx-auto px-4 py-6">
+
       <Header 
         dateFilter={dateFilter}
         setDateFilter={setDateFilter}
@@ -181,8 +192,8 @@ const ProductionConsolidated = () => {
       ) : error ? (
         <div className="bg-red-50 text-red-500 p-4 rounded-lg text-center">{error}</div>
       ) : (
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 overflow-x-auto">
+          <div className="space-y-6 min-w-max">
             {Object.entries(groupedData).map(([categoria, items]) => (
               <CategoryTable 
                 key={categoria} 

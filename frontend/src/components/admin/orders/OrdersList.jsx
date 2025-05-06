@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiChevronRight, FiCalendar, FiUser, FiPackage, FiMapPin } from 'react-icons/fi';
 import { formatDate } from '../../../utils/dateUtils';
 
-// Modificar props para eliminar formatDate
-const OrdersList = ({ orders, isLoading, error, getStatusColor, formatStatus }) => {
+const OrdersList = ({ orders, isLoading, error, getStatusColor, onViewDetails }) => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -29,48 +28,71 @@ const OrdersList = ({ orders, isLoading, error, getStatusColor, formatStatus }) 
     );
   }
 
+  // Función para formatear el estado para mostrar
+  const formatStatus = (status) => {
+    const statusLabels = {
+      solicitado: 'Solicitado',
+      pendiente: 'Pendiente',
+      en_proceso: 'En Proceso',
+      completado: 'Completado',
+      cancelado: 'Cancelado',
+      entregado: 'Entregado'
+    };
+    return statusLabels[status] || status;
+  };
+
   return (
-    <div className="divide-y divide-gray-100">
+    <div className="divide-y divide-gray-100 bg-white rounded-lg shadow-sm">
       {orders.map(order => (
         <Link 
           key={order.id} 
           to={`/admin/orders/${order.id}`}
-          className="block p-3 hover:bg-gray-50 transition-colors"
+          className="block p-3 sm:p-4 hover:bg-gray-50 transition-colors"
+          onClick={(e) => {
+            if (onViewDetails) {
+              e.preventDefault();
+              onViewDetails(order.id);
+            }
+          }}
         >
-          <div className="flex justify-between items-start mb-1">
-            <h3 className="font-medium">Pedido #{order.id}</h3>
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="font-medium text-sm sm:text-base">Pedido #{order.id}</h3>
             <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(order.estado)}`}>
               {formatStatus(order.estado)}
             </span>
           </div>
           
-          <div className="flex items-center text-sm text-gray-500 mb-1">
-            <FiCalendar className="mr-1" size={14} />
-            {formatDate(order.fecha)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2">
+            <div className="flex items-center text-xs sm:text-sm text-gray-500">
+              <FiCalendar className="mr-1 flex-shrink-0" size={14} />
+              <span className="truncate">{formatDate(order.fecha)}</span>
+            </div>
+            
+            {/* Mostrar información del cliente */}
+            {order.cliente_nombre && (
+              <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                <FiUser className="mr-1 flex-shrink-0" size={14} />
+                <span className="truncate">{order.cliente_nombre}</span>
+              </div>
+            )}
+            
+            {/* Mostrar información de la sucursal si existe */}
+            {order.sucursal_nombre && (
+              <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                <FiMapPin className="mr-1 flex-shrink-0" size={14} />
+                <span className="truncate">{order.sucursal_nombre}</span>
+              </div>
+            )}
+            
+            <div className="flex items-center text-xs sm:text-sm text-gray-600">
+              <FiPackage className="mr-1 flex-shrink-0" size={14} />
+              <span className="truncate">
+                {order.total_productos ? `${order.total_productos} productos` : 'Ver detalle'}
+              </span>
+            </div>
           </div>
           
-          {/* Mostrar información del cliente */}
-          {order.cliente_nombre && (
-            <div className="flex items-center text-sm text-gray-600 mb-1">
-              <FiUser className="mr-1" size={14} />
-              {order.cliente_nombre}
-            </div>
-          )}
-          
-          {/* Mostrar información de la sucursal si existe */}
-          {order.sucursal_nombre && (
-            <div className="flex items-center text-sm text-gray-600 mb-1">
-              <FiMapPin className="mr-1" size={14} />
-              {order.sucursal_nombre}
-            </div>
-          )}
-          
-          <div className="flex justify-between items-center mt-2">
-            <div className="flex items-center text-sm text-gray-600">
-              <FiPackage className="mr-1" size={14} />
-              {/* Mostrar total_productos si existe, de lo contrario mostrar un valor predeterminado */}
-              {order.total_productos ? `${order.total_productos} productos` : 'Ver detalle'}
-            </div>
+          <div className="flex justify-end mt-2">
             <FiChevronRight className="text-gray-400" />
           </div>
         </Link>

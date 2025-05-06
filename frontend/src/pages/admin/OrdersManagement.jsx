@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FiShoppingCart, FiFilter, FiPieChart } from 'react-icons/fi';
+import { FiPieChart } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import OrderService from '../../services/OrderService';
 import OrdersList from '../../components/admin/orders/OrdersList';
-import OrdersFilter from '../../components/admin/orders/OrdersFilter';
+import { toast } from 'react-hot-toast';
 
 // Función auxiliar para formatear fecha
 const formatDateForInput = (date) => {
@@ -19,67 +19,41 @@ const formatDateForInput = (date) => {
   return [year, month, day].join('-');
 };
 
-// Función auxiliar para formatear fecha para mostrar
-const formatDateDisplay = (dateString) => {
-  const options = { day: 'numeric', month: 'short', year: 'numeric' };
-  return new Date(dateString).toLocaleDateString('es-ES', options);
-};
-
 export default function OrdersManagement() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
-  const [filteredOrders, setFilteredOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dateFilter, setDateFilter] = useState(formatDateForInput(new Date()));
   const [statusFilter, setStatusFilter] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
 
+  // Modificamos para que se ejecute cuando cambie la fecha o el estado
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrdersByDate();
+  }, [dateFilter, statusFilter]);
 
-  useEffect(() => {
-    filterOrders();
-  }, [orders, dateFilter, statusFilter]);
-
-  const fetchOrders = async () => {
+  // Reemplazamos fetchOrders por fetchOrdersByDate
+  const fetchOrdersByDate = async () => {
     try {
       setIsLoading(true);
-      const response = await OrderService.getAllOrders();
+      setError(null);
+      
+      // Usamos el método getOrdersByDate del servicio
+      const response = await OrderService.getOrdersByDate(dateFilter, statusFilter);
+      
       if (response.success) {
-        const sortedOrders = response.data.sort((a, b) => 
-          new Date(b.fecha) - new Date(a.fecha)
-        );
-        setOrders(sortedOrders);
-        setFilteredOrders(sortedOrders);
+        // Ya no necesitamos filtrar aquí, el backend lo hace por nosotros
+        setOrders(response.data);
       } else {
         setError(response.message || 'Error al cargar los pedidos');
       }
     } catch (err) {
       console.error('Error al cargar pedidos:', err);
       setError(err.message || 'Error al cargar los pedidos');
+      toast.error('Error al cargar los pedidos: ' + (err.message || 'Error desconocido'));
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const filterOrders = () => {
-    let result = [...orders];
-    
-    if (dateFilter) {
-      const filterDate = new Date(dateFilter + 'T00:00:00Z');
-      result = result.filter(order => {
-        const orderDate = new Date(order.fecha);
-        return orderDate.toISOString().split('T')[0] === filterDate.toISOString().split('T')[0];
-      });
-    }
-    
-    if (statusFilter !== 'all') {
-      result = result.filter(order => order.estado === statusFilter);
-    }
-    
-    setFilteredOrders(result);
   };
 
   const getStatusColor = (status) => {
@@ -88,73 +62,85 @@ export default function OrdersManagement() {
       pendiente: 'bg-yellow-100 text-yellow-800',
       en_proceso: 'bg-blue-100 text-blue-800',
       completado: 'bg-green-100 text-green-800',
-      cancelado: 'bg-red-100 text-red-800'
+      cancelado: 'bg-red-100 text-red-800',
+      entregado: 'bg-green-100 text-green-800'
     };
     return statusColors[status] || 'bg-gray-100 text-gray-800';
   };
-
-  const formatStatus = (status) => {
-    const statusLabels = {
-      solicitado: 'Solicitado',
-      pendiente: 'Pendiente',
-      en_proceso: 'En proceso',
-      completado: 'Completado',
-      cancelado: 'Cancelado'
-    };
-    return statusLabels[status] || status;
+  
+  // Manejador para el cambio de fecha
+  const handleDateChange = (e) => {
+    setDateFilter(e.target.value);
   };
 
-  // Actualizar la navegación al consolidado
-  const handleNavigateToConsolidated = () => {
-    const formattedDate = dateFilter;
-    navigate(`/admin/production/consolidated`, { 
-      state: { selectedDate: formattedDate } 
+  // Función para navegar al consolidado pasando la fecha seleccionada
+  const navigateToConsolidated = () => {
+    navigate('/admin/production/consolidated', {
+      state: { selectedDate: dateFilter }
     });
   };
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-4 max-w-lg">
-      <div className="bg-white rounded-lg shadow-md mb-4">
-        <div className="p-3 sm:p-4 border-b border-gray-100 flex justify-between items-center">
-          <h1 className="text-xl font-semibold flex items-center">
-            <FiShoppingCart className="mr-2" />
-            Pedidos
-          </h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleNavigateToConsolidated}
-              className="p-2 rounded-full hover:bg-green-50 text-green-600 transition-colors"
-              title="Consolidado de producción"
-            >
-              <FiPieChart className="w-5 h-5" />
-            </button>
-            <button 
-              onClick={() => setShowFilters(!showFilters)}
-              className="p-2 rounded-full hover:bg-gray-100"
-              title="Filtrar"
-            >
-              <FiFilter />
-            </button>
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h1 className="text-xl md:text-2xl font-semibold">Gestión de Pedidos</h1>
+        <div className="flex flex-col sm:flex-row w-full md:w-auto space-y-3 sm:space-y-0 sm:space-x-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <div className="w-full sm:w-auto">
+              <label htmlFor="date-filter" className="block text-sm font-medium text-gray-700 mb-1 md:hidden">
+                Fecha
+              </label>
+              <input
+                id="date-filter"
+                type="date"
+                value={dateFilter}
+                onChange={handleDateChange}
+                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div className="w-full sm:w-auto">
+              <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-1 md:hidden">
+                Estado
+              </label>
+              <select
+                id="status-filter"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-md"
+              >
+                <option value="all">Todos</option>
+                <option value="solicitado">Solicitado</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="en_proceso">En Proceso</option>
+                <option value="completado">Completado</option>
+                <option value="cancelado">Cancelado</option>
+                <option value="entregado">Entregado</option>
+              </select>
+            </div>
           </div>
+          <button
+            onClick={navigateToConsolidated}
+            className="w-full sm:w-auto flex justify-center items-center px-3 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200"
+          >
+            <FiPieChart className="mr-2" />
+            Consolidado
+          </button>
         </div>
-        
-        <OrdersFilter 
-          dateFilter={dateFilter}
-          setDateFilter={setDateFilter}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          showFilters={showFilters}
-        />
-        
-        <OrdersList 
-          orders={filteredOrders}
-          isLoading={isLoading}
-          error={error}
-          formatDate={formatDateDisplay}
-          getStatusColor={getStatusColor}
-          formatStatus={formatStatus}
-        />
       </div>
+
+      {error ? (
+        <div className="bg-red-100 text-red-800 p-4 rounded-md mb-4">
+          {error}
+        </div>
+      ) : (
+        <OrdersList 
+          orders={orders} 
+          isLoading={isLoading} 
+          error={error}
+          getStatusColor={getStatusColor}
+          onViewDetails={(id) => navigate(`/admin/orders/${id}`)}
+        />
+      )}
     </div>
   );
 }
