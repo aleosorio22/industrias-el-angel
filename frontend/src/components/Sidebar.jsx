@@ -21,7 +21,8 @@ import {
   FiHash,
   FiBox, 
   FiLayers,
-  FiDollarSign
+  FiDollarSign,
+  FiServer // <-- Añadir icono para plantas (o el que prefieras)
 } from "react-icons/fi"
 
 // Creamos un contexto para compartir el estado del sidebar
@@ -68,20 +69,22 @@ export default function Sidebar() {
   const location = useLocation()
   const { isExpanded, setIsExpanded, isMobileOpen, setIsMobileOpen } = useSidebar()
 
+  // Asegúrate de que este array se use para generar los items del menú del admin
   const menuItems = [
     { name: "Dashboard", icon: FiHome, path: "/admin/dashboard" },
     { name: "Usuarios", icon: FiUsers, path: "/admin/users" },
+    { name: "Clientes", icon: FiUsers, path: "/admin/clients" },
     { name: "Categorías", icon: FiTag, path: "/admin/categories" },
     { name: "Productos", icon: FiPackage, path: "/admin/products" },
     { name: "Unidades", icon: FiHash, path: "/admin/units"},
     { name: "Presentaciones", icon: FiBox, path: "/admin/presentations" },
     { name: "Pedidos", icon: FiShoppingCart, path: "/admin/orders" },
-    { name: "Reportes", icon: FiPieChart, path: "/admin/reports" },
-    { name: "Configuración", icon: FiSettings, path: "/admin/settings" },
-    { name: "Ayuda", icon: FiHelpCircle, path: "/admin/help" },
-    { name: "Clientes", icon: FiUsers, path: "/admin/clients" },
     { name: "Cobro de ventas", icon: FiDollarSign, path: "/admin/accounts-receivable" },
     { name: "Áreas de Producción", icon: FiLayers, path: "/admin/production-areas" },
+    { name: "Plantas de Producción", icon: FiServer, path: "/admin/plants" }, // <-- Nuevo elemento
+    { name: "Reportes", icon: FiPieChart, path: "/admin/reports" }, // Ajusta el orden si es necesario
+    { name: "Configuración", icon: FiSettings, path: "/admin/settings" },
+    { name: "Ayuda", icon: FiHelpCircle, path: "/admin/help" },
   ]
 
   const isActive = (path) => {

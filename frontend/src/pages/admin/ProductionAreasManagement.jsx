@@ -270,7 +270,15 @@ export default function ProductionAreasManagement() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-display font-semibold text-text">Gestión de Áreas de Producción</h1>
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => {
+            setSelectedArea(null);
+            setFormData({
+              nombre: "",
+              descripcion: "",
+              categorias: []
+            });
+            setIsCreateModalOpen(true);
+          }}
           className="flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
         >
           <FiPlus className="mr-2" />
@@ -316,23 +324,19 @@ export default function ProductionAreasManagement() {
       <ProductionAreaFormModal
         isOpen={isCreateModalOpen}
         onClose={() => {
-          setIsCreateModalOpen(false)
-          setSelectedArea(null)
+          setIsCreateModalOpen(false);
+          setSelectedArea(null);
           setFormData({
             nombre: "",
             descripcion: "",
             categorias: []
-          })
+          });
         }}
         onSubmit={handleSubmit}
-        formData={formData}
-        setFormData={setFormData}
         isEditing={!!selectedArea}
         selectedArea={selectedArea}
         categories={categories}
-        isConfirmDialogOpen={isConfirmDialogOpen}
-        setIsConfirmDialogOpen={setIsConfirmDialogOpen}
       />
     </div>
-  )
+  );
 }

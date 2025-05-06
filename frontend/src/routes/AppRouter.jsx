@@ -26,6 +26,7 @@ import AdminOrderDetail from "../pages/admin/OrderDetail";
 import ProductionAreasManagement from "../pages/admin/ProductionAreasManagement";
 import ProductionAreaDetails from "../pages/admin/ProductionAreaDetails";
 import ProductionConsolidated from "../pages/admin/ProductionConsolidated";
+import PlantsManagement from "../pages/admin/PlantsManagement"; // <-- Importar la nueva página
 
 //pages de usuarios
 import UserDashboard from "../pages/user/UserDashboard";
@@ -87,6 +88,8 @@ function AppRouter() {
             <Route path="/admin/production/consolidated" element={<ProductionConsolidated />} />
             <Route path="/admin/production-areas" element={<ProductionAreasManagement />} />
             <Route path="/admin/production-areas/:id/details" element={<ProductionAreaDetails />} />
+            <Route path="/admin/plants" element={<PlantsManagement />} /> {/* <-- Nueva ruta */}
+            <Route path="/admin/production/consolidated" element={<ProductionConsolidated />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         ) : auth.user.rol === 'repartidor' ? (
