@@ -1,5 +1,4 @@
 const db = require('../../../core/config/database');
-const GraphModel = require('./graphModel');
 
 class OrderModel {
     /**
@@ -37,26 +36,6 @@ class OrderModel {
             // Confirmar transacción
             await connection.commit();
             connection.release();
-            const [[usuarioRow]] = await connection.execute(
-                'SELECT nombre FROM usuarios WHERE id = ?',
-                [usuario_id]
-            );
-            const nombreUsuario = usuarioRow?.nombre || `Usuario${usuario_id}`;
-            
-            // Por cada producto, obtener su nombre desde MySQL
-            for (const producto of productos) {
-                const [[productoRow]] = await connection.execute(
-                    'SELECT nombre FROM productos WHERE id = ?',
-                    [producto.producto_id]
-                );
-                const nombreProducto = productoRow?.nombre || `Producto${producto.producto_id}`;
-            
-                // Guardar en Neo4j con los nombres reales
-                await GraphModel.registrarPedido(
-                    { id: usuario_id, nombre: nombreUsuario },
-                    { id: producto.producto_id, nombre: nombreProducto }
-                  );
-            }
             
             return orderId;
         } catch (error) {
@@ -111,14 +90,23 @@ class OrderModel {
      */
     static async findAll(userId, isAdmin) {
         let query = `
-            SELECT p.*, 
-                   c.nombre as cliente_nombre, 
-                   s.nombre as sucursal_nombre,
-                   (SELECT COUNT(*) FROM pedido_detalle WHERE pedido_id = p.id) as total_productos
+            SELECT 
+                p.id,
+                p.cliente_id,
+                p.sucursal_id,
+                p.usuario_id,
+                DATE_FORMAT(p.fecha, '%Y-%m-%d') as fecha,
+                p.estado,
+                p.observaciones,
+                p.created_at,
+                p.updated_at,
+                c.nombre as cliente_nombre, 
+                s.nombre as sucursal_nombre,
+                (SELECT COUNT(*) FROM pedido_detalle WHERE pedido_id = p.id) as total_productos
             FROM pedidos p
             LEFT JOIN clientes c ON p.cliente_id = c.id
             LEFT JOIN sucursales s ON p.sucursal_id = s.id
-        `;
+        `;;
         
         // Si no es admin, solo mostrar pedidos del usuario
         if (!isAdmin) {
@@ -130,6 +118,7 @@ class OrderModel {
         const [orders] = await db.execute(query);
         return orders;
     }
+ fix/pendientes-pago
 
      /**
     * Encuentra pedidos entregados (pendientes de pago)
@@ -170,11 +159,6 @@ class OrderModel {
         return orders;
     }
     
-    /**
-     * Obtiene un pedido por su ID con todos sus detalles
-     * @param {number} id - ID del pedido
-     * @returns {Promise<Object>} - Pedido con sus detalles
-     */
     static async findById(id) {
         // Obtener información básica del pedido
         const [orders] = await db.execute(`
@@ -391,6 +375,7 @@ class OrderModel {
         return results;
     }
 
+
         /**
      * Obtiene los pedidos para una fecha específica
      * @param {string} date - Fecha en formato YYYY-MM-DD
@@ -431,6 +416,7 @@ class OrderModel {
      * @param {number} total_unidades - Total de unidades a producir
      * @returns {Promise<Object>} - Información actualizada del producto
      */
+
     static async updateProductionQuantity(date, producto_id, total_unidades) {
         const connection = await db.getConnection();
         try {
@@ -487,13 +473,10 @@ class OrderModel {
             arrobas_necesarias: Number(info.arrobas_necesarias),
             libras_necesarias: Number(info.libras_necesarias)
         };
-    } 
-    finally {
+    } finally {
         connection.release();
     }
 }
-
-
     
 }
 
