@@ -422,49 +422,14 @@ class OrderModel {
         return orders;
     }
 
-        /**
-     * Obtiene los pedidos para una fecha específica
-     * @param {string} date - Fecha en formato YYYY-MM-DD
-     * @param {string|null} status - Estado del pedido (opcional)
-     * @returns {Promise<Array>} - Lista de pedidos
-     */
-    static async findByDate(date, status = null) {
-        try {
-            console.log('Buscando pedidos para la fecha:', date, 'con estado:', status);
-            
-            let query = `
-                SELECT p.*, 
-                       c.nombre as cliente_nombre, 
-                       s.nombre as sucursal_nombre,
-                       (SELECT COUNT(*) FROM pedido_detalle WHERE pedido_id = p.id) as total_productos
-                FROM pedidos p
-                LEFT JOIN clientes c ON p.cliente_id = c.id
-                LEFT JOIN sucursales s ON p.sucursal_id = s.id
-                WHERE DATE(p.fecha) = ?
-            `;
-            
-            const params = [date];
-            
-            if (status && status !== 'all') {
-                query += ' AND p.estado = ?';
-                params.push(status);
-            }
-            
-            query += ' ORDER BY p.id DESC';
-            
-            console.log('Query ejecutada:', query);
-            console.log('Parámetros:', params);
-            
-            const [orders] = await db.execute(query, params);
-            console.log('Pedidos encontrados:', orders.length);
-            
-            return orders;
-        } catch (error) {
-            console.error('Error en findByDate:', error);
-            throw error;
-        }
-    }
 
+    /**
+     * Actualiza la cantidad de producción para un producto específico
+     * @param {string} date - Fecha en formato YYYY-MM-DD
+     * @param {number} producto_id - ID del producto
+     * @param {number} total_unidades - Total de unidades a producir
+     * @returns {Promise<Object>} - Información actualizada del producto
+     */
     static async updateProductionQuantity(date, producto_id, total_unidades) {
         const connection = await db.getConnection();
         try {
