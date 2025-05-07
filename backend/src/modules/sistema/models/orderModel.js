@@ -131,12 +131,12 @@ class OrderModel {
         return orders;
     }
 
-    /**
+     /**
     * Encuentra pedidos entregados (pendientes de pago)
     * @param {number|null} clienteId - ID del cliente (opcional)
     * @returns {Promise<Array>} - Lista de pedidos
     */
-    static async findDeliveredPendingPayment(clienteId = null) {
+     static async findDeliveredPendingPayment(clienteId = null) {
         let query = `
             SELECT p.*, 
                    c.nombre as cliente_nombre, 
@@ -420,7 +420,7 @@ class OrderModel {
         
         const [orders] = await db.execute(query, params);
         return orders;
-        
+
     }
 
 

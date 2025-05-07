@@ -69,7 +69,7 @@ export default function ClientGroupedOrders({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <div className="flex space-x-2">
-                    <Link
+                      <Link
                       to={`/admin/orders/${order.id}`}
                       className="text-blue-600 hover:text-blue-800"
                     >

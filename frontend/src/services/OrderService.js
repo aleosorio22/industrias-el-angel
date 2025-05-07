@@ -235,7 +235,8 @@ const OrderService = {
             message: error.response?.data?.message || 'Error al cargar los pedidos por fecha'
         };
     }
-},
+  },
+  
   getPendingPaymentOrders: async (clientId = null, page = 1, pageSize = 10) => {
     try {
       let url = `${API_BASE_URL}/orders/pendientes-pago`;
@@ -284,6 +285,7 @@ const OrderService = {
       };
     }
   },
+  
 };
 
 export default OrderService;

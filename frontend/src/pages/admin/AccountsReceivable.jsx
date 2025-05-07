@@ -101,9 +101,9 @@ export default function AccountsReceivable() {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-MX', {
+    return new Intl.NumberFormat('es-GT', {
       style: 'currency',
-      currency: 'MXN'
+      currency: 'GTQ'
     }).format(amount || 0);
   };
 
