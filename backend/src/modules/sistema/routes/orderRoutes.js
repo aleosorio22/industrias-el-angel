@@ -17,7 +17,7 @@ router.get('/production-consolidated/:date', isAdmin, orderController.getProduct
 router.patch('/production-consolidated/:date', isAdmin, orderController.updateProductionQuantity);
 
 // IMPORTANTE: Esta ruta debe ir ANTES de la ruta con :id
-router.get('/pendientes-pago', orderController.getPendingPaymentOrders);
+router.get('/pendientes-pago', isDeliveryOrAdmin, orderController.getPendingPaymentOrders);
 
 // Obtener todos los pedidos - permitir a repartidores y admins
 router.get('/', isDeliveryOrAdmin, orderController.getOrders);
