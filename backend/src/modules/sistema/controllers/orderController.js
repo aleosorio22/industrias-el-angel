@@ -301,10 +301,21 @@ class OrderController {
             const { date } = req.params;
             const { status } = req.query;
             
+            console.log('Solicitud de pedidos para fecha:', date, 'estado:', status);
+            
             if (!date) {
                 return res.status(400).json({
                     success: false,
                     message: 'Se requiere una fecha para filtrar los pedidos'
+                });
+            }
+            
+            // Validar formato de fecha
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(date)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Formato de fecha inválido. Use YYYY-MM-DD'
                 });
             }
             
