@@ -199,22 +199,43 @@ const OrderService = {
     }
   },
   getOrdersByDate: async (date, status = 'all') => {
-      try {
+    try {
+        console.log('Solicitando pedidos para fecha:', date, 'estado:', status);
+        
+        // Validar formato de fecha
+        if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            console.error('Formato de fecha inválido:', date);
+            return {
+                success: false,
+                message: 'Formato de fecha inválido. Use YYYY-MM-DD'
+            };
+        }
+        
         const url = `${API_BASE_URL}/orders/by-date/${date}${status !== 'all' ? `?status=${status}` : ''}`;
+        console.log('URL de solicitud:', url);
+        
         const response = await axios.get(url, getAuthHeaders());
         
+        console.log('Respuesta del servidor:', response.status, response.data);
+        
         return {
-          success: true,
-          data: response.data.data || []
+            success: true,
+            data: response.data.data || []
         };
-      } catch (error) {
-        console.error('Error fetching orders by date:', error);
+    } catch (error) {
+        console.error('Error completo al obtener pedidos por fecha:', error);
+        
+        // Mostrar detalles completos del error
+        if (error.response) {
+            console.error('Respuesta del servidor:', error.response.status, error.response.data);
+        }
+        
         return {
-          success: false,
-          message: error.response?.data?.message || 'Error al cargar los pedidos por fecha'
+            success: false,
+            message: error.response?.data?.message || 'Error al cargar los pedidos por fecha'
         };
-      }
-  },
+    }
+},
   getPendingPaymentOrders: async (clientId = null, page = 1, pageSize = 10) => {
     try {
       let url = `${API_BASE_URL}/orders/pendientes-pago`;
