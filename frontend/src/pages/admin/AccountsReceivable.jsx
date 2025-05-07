@@ -92,6 +92,7 @@ export default function AccountsReceivable() {
     setPagination({ ...pagination, currentPage: newPage });
   };
 
+  
   const handlePageSizeChange = (newSize) => {
     setPagination({ 
       ...pagination, 
