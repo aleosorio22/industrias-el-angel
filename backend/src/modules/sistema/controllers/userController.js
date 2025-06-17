@@ -28,7 +28,7 @@ exports.login = async (req, res) => {
                 rol: user.rol 
             },
             process.env.JWT_SECRET,
-            { expiresIn: '24h' }
+            { expiresIn: process.env.JWT_EXPIRATION || '7d' } // Usar una variable de entorno para la expiración
         );
 
         // Enviar respuesta con token y datos del usuario

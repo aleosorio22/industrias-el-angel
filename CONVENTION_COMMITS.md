@@ -11,7 +11,7 @@ Esta convención define cómo deben estructurarse los mensajes de commit en este
 ```
 
 ---
-
+d
 ## Tipos permitidos
 
 | Tipo       | Descripción                                               |
