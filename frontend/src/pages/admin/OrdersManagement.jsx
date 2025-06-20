@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiPieChart } from 'react-icons/fi';
+import { FiPieChart, FiArrowDownCircle, FiDownload } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import OrderService from '../../services/OrderService';
 import OrdersList from '../../components/admin/orders/OrdersList';
@@ -116,6 +116,15 @@ export default function OrdersManagement() {
                 <option value="cancelado">Cancelado</option>
                 <option value="entregado">Entregado</option>
               </select>
+            </div>
+            <div className="w-full sm:w-auto">
+              <button 
+                onClick={alert.bind(null, 'Funcionalidad en desarrollo: Ticket 20/06/2025')}
+                className="w-full sm:w-auto flex justify-center items-center px-3 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200"
+              >
+                <FiDownload className="mr-2" />
+                Descargar Pedidos
+              </button>
             </div>
           </div>
           <button
