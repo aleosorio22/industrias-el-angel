@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { FiArrowLeft, FiCalendar, FiUser, FiMapPin, FiPackage, FiClipboard, FiPrinter } from 'react-icons/fi';
+import { FiArrowLeft, FiCalendar, FiUser, FiMapPin, FiPackage, FiClipboard, FiPrinter, FiDownload } from 'react-icons/fi';
 import OrderService from '../../services/OrderService';
 import { formatDate } from '../../utils/dateUtils';
+import { exportOrderToExcel } from '../../utils/excelUtils';
 
 // Eliminar cualquier función formatDate local
 export default function OrderDetail() {
@@ -120,14 +121,24 @@ export default function OrderDetail() {
             <h1 className="text-xl font-semibold">Pedido #{order.id}</h1>
             <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(order.estado)}`}>
               {formatStatus(order.estado)}
-            </span>            <button
-              onClick={() => window.print()}
-              className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition-colors duration-200 font-medium text-sm"
-              title="Imprimir detalle del pedido"
-            >
-              <FiPrinter className="mr-2" size={16} />
-              Imprimir
-            </button>
+            </span>            <div className="flex gap-2">
+              <button
+                onClick={() => window.print()}
+                className="flex items-center px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition-colors duration-200 font-medium text-sm"
+                title="Imprimir detalle del pedido"
+              >
+                <FiPrinter className="mr-2" size={16} />
+                Imprimir
+              </button>
+              <button
+                onClick={() => exportOrderToExcel(order)}
+                className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors duration-200 font-medium text-sm"
+                title="Exportar a Excel"
+              >
+                <FiDownload className="mr-2" size={16} />
+                Excel
+              </button>
+            </div>
           </div>
         </div>
         
